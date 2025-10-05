@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ripple Effect — charity: water Game Concept</title>
+  <meta name="description" content="Ripple Effect — mobile game concept to raise awareness for clean water. Play the mini-game, learn about the mission, and claim campus rewards."/>
+  <style>
+    :root{
+      --cw-yellow: #ffd300;
+      --cw-dark: #07263a;
+      --cw-blue: #1ea7ea;
+      --muted:#6b7b85;
+      --bg:#f8fbff;
+      --glass: rgba(255,255,255,0.7);
+      --card-shadow: 0 6px 20px rgba(7,38,58,0.08);
+      --rounded: 14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg) 0%, #ffffff 60%);
+      color:var(--cw-dark);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .site{
+      width:100%;
+      max-width:1100px;
+      margin:0 auto;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      margin-bottom:18px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo-mark{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--cw-yellow),var(--cw-blue));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 6px 18px rgba(30,167,234,0.12);
+      color:white;
+      font-weight:700;
+      font-size:20px;
+    }
+    h1{margin:0;font-size:20px}
+    .hero{
+      background:linear-gradient(180deg,rgba(255,255,255,0.8),rgba(255,255,255,0.6));
+      border-radius: var(--rounded);
+      padding:20px;
+      box-shadow: var(--card-shadow);
+      display:flex;
+      gap:20px;
+      align-items:stretch;
+      margin-bottom:20px;
+    }
+
+    .left{
+      flex:1.1;
+      min-width:260px;
+    }
+    .right{
+      flex:1;
+      min-width:320px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .tag{
+      display:inline-block;
+      padding:6px 10px;
+      background:rgba(0,0,0,0.04);
+      border-radius:999px;
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .summary{
+      font-size:15px;
+      color:var(--cw-dark);
+      line-height:1.45;
+    }
+
+    .cta-row{
+      margin-top:12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .btn{
+      border:0;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: 0 6px 16px rgba(7,38,58,0.06);
+    }
+    .btn-play{ background:var(--cw-yellow); color:var(--cw-dark); }
+    .btn-learn{ background:transparent; color:var(--cw-dark); border:1px solid rgba(7,38,58,0.06); }
+
+    .card{
+      background:white;
+      border-radius:12px;
+      padding:14px;
+      box-shadow: var(--card-shadow);
+    }
+
+    /* Game area */
+    .game-wrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .game-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .score{
+      font-weight:700;
+      font-size:18px;
+    }
+    .meter{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .bar{
+      width:140px;
+      height:12px;
+      background:linear-gradient(90deg,#e6f7ff,#fff);
+      border-radius:999px;
+      border:1px solid rgba(7,38,58,0.04);
+      overflow:hidden;
+    }
+    .bar-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--cw-blue),var(--cw-yellow));
+      transition:width 250ms ease;
+    }
+    canvas{
+      display:block;
+      width:100%;
+      background: linear-gradient(180deg,#f2fbff,#ffffff);
+      border-radius:10px;
+      border:1px solid rgba(7,38,58,0.03);
+      max-height:480px;
+    }
+
+    /* results panel */
+    .results{
+      display:none;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+      padding:12px;
+      text-align:center;
+    }
+    .results.show{ display:flex; }
+
+    .facts{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer{
+      text-align:center;
+      margin-top:18px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    /* layout grid for features + wireframes */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .wireframe{
+      background:linear-gradient(180deg,#ffffff, #fcfdff);
+      padding:12px;
+      border-radius:12px;
+      border:1px dashed rgba(7,38,58,0.04);
+    }
+    .wireframe .mock{
+      height:260px;
+      border-radius:10px;
+      background:linear-gradient(180deg,#f8fcff,#ffffff);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-weight:600;
+      letter-spacing:0.6px;
+      border:1px solid rgba(7,38,58,0.03);
+    }
+
+    /* responsive */
+    @media (max-width:900px){
+      .hero{flex-direction:column}
+      .grid{grid-template-columns:1fr}
+      .right{order:2}
+      .left{order:1}
+      body{padding:16px}
+    }
+
+    /* modal */
+    .modal-backdrop{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(7,38,58,0.4); z-index:9999;
+    }
+    .modal{
+      background:white; padding:18px; border-radius:12px; width:380px; max-width:90%;
+      box-shadow:0 18px 60px rgba(7,38,58,0.2);
+    }
+    .modal h3{margin:0 0 8px 0;}
+    .close-btn{background:transparent;border:0;cursor:pointer;font-size:16px;padding:6px}
+    .leaderboard{
+      margin-top:8px; font-size:13px; color:var(--muted);
+    }
+
+    .small{
+      font-size:13px;color:var(--muted);
+    }
+
+    /* micro-animations */
+    .pulse{
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%{transform:scale(1)}
+      50%{transform:scale(1.02)}
+      100%{transform:scale(1)}
+    }
+
+  </style>
+</head>
+<body>
+  <main class="site" id="site">
+    <header>
+      <div class="logo" aria-label="logo">
+        <div class="logo-mark" aria-hidden="true">RW</div>
+        <div>
+          <h1>Ripple Effect</h1>
+          <div class="small">A charity: water student engagement game</div>
+        </div>
+      </div>
+      <div style="margin-left:auto" class="small">By <strong>Rhiannon Pickard</strong></div>
+    </header>
+
+    <section class="hero" role="region" aria-label="project overview">
+      <div class="left">
+        <span class="tag">Week 1 — Game Concept</span>
+        <p class="summary">
+          Ripple Effect is a fun, mobile-first game that teaches players about clean water access.
+          Tap clean water drops to fill a virtual jerrycan and build wells for villages. Avoid polluted drops.
+          Earn <strong>Ripple Coins</strong> that convert to on-campus rewards and leaderboard recognition.
+        </p>
+
+        <div class="cta-row">
+          <button class="btn btn-play" id="jumpToGame">Play Mini Game</button>
+          <button class="btn btn-learn" id="howItWorksBtn">How It Works</button>
+        </div>
+      </div>
+
+      <aside class="right">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Current Campaign</div>
+              <div style="font-weight:700">#CampusRipples</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Rewards</div>
+              <div style="font-weight:700">Cafeteria discount</div>
+            </div>
+          </div>
+          <div style="margin-top:12px" class="small">Use the game to earn points and unlock exclusive campus offers. Weekly campus leaderboards help increase friendly competition.</div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Prototype</div>
+              <div style="font-weight:700">Playable Demo</div>
+            </div>
+            <div class="small">30s rounds • Mobile-first</div>
+          </div>
+          <div style="margin-top:8px" class="small">Tip: Click or tap the falling drops. Clean drops give points. Polluted drops reduce water level.</div>
+        </div>
+
+      </aside>
+    </section>
+
+    <section class="grid" aria-label="game and wireframes">
+
+      <div>
+        <div class="card game-wrap" id="gameSection">
+          <div class="game-header">
+            <div class="score" aria-live="polite">Score: <span id="score">0</span></div>
+            <div class="meter">
+              <div class="small">Water</div>
+              <div class="bar" aria-hidden="true">
+                <div class="bar-fill" id="barFill" style="width:0%"></div>
+              </div>
+              <div id="timer" class="small">30s</div>
+            </div>
+          </div>
+
+          <canvas id="gameCanvas" width="720" height="420" aria-label="Ripple Effect game canvas" tabindex="0"></canvas>
+
+          <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
+            <div class="small">Lives: <span id="lives">3</span></div>
+            <div>
+              <button class="btn btn-play" id="startBtn">Start Round</button>
+              <button class="btn btn-learn" id="resetBtn">Reset</button>
+            </div>
+          </div>
+
+          <div class="results" id="results">
+            <div style="font-weight:700" id="resultsTitle">Round Complete</div>
+            <div id="resultsStats" class="small">You scored 0 points.</div>
+            <div class="facts" id="levelFact">Fun fact about water.</div>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button class="btn btn-play" id="claimBtn">Claim Campus Reward</button>
+              <button class="btn btn-learn" id="shareBtn">Share</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <aside>
+        <div class="wireframe card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-weight:700">Wireframes</div>
+            <div class="small">Mobile / Tablet</div>
+          </div>
+
+          <div class="mock" aria-hidden="true">Wireframe: Start • Gameplay • Results</div>
+
+          <ul style="margin-top:12px">
+            <li class="small"><strong>Start:</strong> charity: water logo, Play Now, How it works</li>
+            <li class="small"><strong>Gameplay:</strong> score, timer, water meter, falling drops, tap interaction</li>
+            <li class="small"><strong>Results:</strong> points → Ripple Coins, claim reward link, fun fact</li>
+          </ul>
+
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="card">
+          <div style="font-weight:700">Brand Notes</div>
+          <div class="small" style="margin-top:8px">
+            Palette: <span style="color:var(--cw-yellow)">Yellow</span>, <span style="color:var(--cw-blue)">Blue</span>, white.
+            Use optimistic tone, friendly icons (water drops, jerrycans), and short educational facts.
+          </div>
+        </div>
+
+      </aside>
+    </section>
+
+    <section class="card" aria-label="game logic">
+      <h3 style="margin:0 0 8px 0">Game Logic</h3>
+      <ol style="margin:0 0 8px 18px">
+        <li>Start 30s round → droplets spawn from top.</li>
+        <li>Tap clean droplets: +10 pts. Polluted droplets: -10% water level (or -1 life).</li>
+        <li>Filling the water meter builds a virtual well → convert to Ripple Coins.</li>
+        <li>Points convert to campus rewards; weekly leaderboards encourage competition.</li>
+      </ol>
+      <div class="small">This in-browser prototype demonstrates core mechanics — it's intentionally simple so it can be extended later with levels, progression, and campus integrations.</div>
+    </section>
+
+    <footer>
+      <div class="small">© 2025 Ripple Effect — prototype for charity: water • Built by Rhiannon Pickard</div>
+    </footer>
+
+    <!-- modal for claim -->
+    <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" role="document">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3>Claim Campus Reward</h3>
+          <button class="close-btn" id="closeModal" aria-label="close">✕</button>
+        </div>
+        <p class="small">You earned <strong id="modalCoins">0</strong> Ripple Coins. Show this screen at the campus kiosk to redeem cafeteria discount.</p>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-play" id="confirmClaim">Get Code</button>
+          <button class="btn btn-learn" id="closeClaim">Cancel</button>
+        </div>
+        <div class="leaderboard" id="claimCodeArea" style="display:none;margin-top:10px">
+          <div class="small">Your code: <strong id="claimCode">RW-XXXX-2025</strong></div>
+          <div class="small" style="margin-top:6px">Present this code at the student center to redeem.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* ------------------------------
+       Playable mini-game logic
+       Canvas-based falling drops with click/tap detection
+       -------------------------------*/
+
+    (function(){
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // adapt size responsively
+      function resize(){
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = Math.min(900, Math.floor(rect.width * devicePixelRatio));
+        canvas.height = Math.min(600, Math.floor((rect.height || 420) * devicePixelRatio));
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+      }
+      // initial
+      const devicePixelRatio = window.devicePixelRatio || 1;
+      // For simplicity, we'll use logical dims for drawing
+      function resetViewport(){
+        const rect = canvas.getBoundingClientRect();
+        canvas._w = Math.max(320, rect.width);
+        canvas._h = Math.max(240, rect.height || 420);
+      }
+      window.addEventListener('resize', () => {
+        resetViewport();
+      });
+
+      resetViewport();
+
+      // Game state
+      let running = false;
+      let drops = [];
+      let lastSpawn = 0;
+      let spawnInterval = 700; // ms
+      let score = 0;
+      let lives = 3;
+      let waterPercent = 0;
+      let roundTime = 30; // seconds
+      let timeLeft = roundTime;
+      let timerId = null;
+      let animationId = null;
+
+      // DOM refs
+      const scoreEl = document.getElementById('score');
+      const livesEl = document.getElementById('lives');
+      const barFill = document.getElementById('barFill');
+      const timerEl = document.getElementById('timer');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const results = document.getElementById('results');
+      const resultsTitle = document.getElementById('resultsTitle');
+      const resultsStats = document.getElementById('resultsStats');
+      const levelFact = document.getElementById('levelFact');
+      const claimBtn = document.getElementById('claimBtn');
+      const modal = document.getElementById('modal');
+      const closeModal = document.getElementById('closeModal');
+      const confirmClaim = document.getElementById('confirmClaim');
+      const claimCode = document.getElementById('claimCode');
+      const claimCodeArea = document.getElementById('claimCodeArea');
+      const modalCoins = document.getElementById('modalCoins');
+      const resetUI = () => {
+        scoreEl.textContent = score;
+        livesEl.textContent = lives;
+        barFill.style.width = Math.round(waterPercent) + '%';
+        timerEl.textContent = Math.max(0, Math.ceil(timeLeft)) + 's';
+      };
+
+      // Utility: random number
+      function rand(min,max){ return Math.random()*(max-min)+min }
+
+      // Drop prototype
+      function createDrop(isPolluted){
+        const size = isPolluted ? rand(18,26) : rand(12,22);
+        const x = rand(size, canvas._w - size);
+        const speed = isPolluted ? rand(90,160) : rand(70,140);
+        // color
+        return {
+          x, y:-size, size, speed,
+          polluted: !!isPolluted,
+          vx: rand(-10,10),
+          // simple bob for clean drops
+          birth: Date.now()
+        };
+      }
+
+      // spawn logic: mix clean & polluted
+      function spawnDrop(){
+        // probability of polluted rises slightly with time
+        const pollutedChance = Math.min(0.28, 0.08 + (30 - timeLeft) * 0.006);
+        const polluted = Math.random() < pollutedChance;
+        drops.push(createDrop(polluted));
+      }
+
+      // draw drop
+      function drawDrop(drop){
+        const x = drop.x; const y = drop.y; const r = drop.size;
+        ctx.save();
+        ctx.beginPath();
+        // draw teardrop shape
+        const grad = ctx.createRadialGradient(x - r*0.25, y - r*0.4, r*0.1, x, y, r*1.2);
+        if(drop.polluted){
+          grad.addColorStop(0,'#5a5a5a');
+          grad.addColorStop(1,'#2b2b2b');
+          ctx.fillStyle = grad;
+          ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        } else {
+          grad.addColorStop(0,'#9ee8ff');
+          grad.addColorStop(1,'#20b3e8');
+          ctx.fillStyle = grad;
+          ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+        }
+        ctx.moveTo(x,y);
+        // teardrop via arc + triangle tip
+        ctx.arc(x, y, r, 0, Math.PI*2);
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // small shine for clean drops
+        if(!drop.polluted){
+          ctx.beginPath();
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.ellipse(x - r*0.25, y - r*0.3, r*0.28, r*0.18, -0.5, 0, Math.PI*2);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.fillStyle = 'rgba(0,0,0,0.12)';
+          ctx.ellipse(x + r*0.15, y - r*0.1, r*0.22, r*0.12, 0.4, 0, Math.PI*2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // animation loop
+      function update(dt){
+        // dt in seconds
+        // spawn
+        if(Date.now() - lastSpawn > spawnInterval){
+          spawnDrop();
+          lastSpawn = Date.now();
+          // make spawn faster as timer goes down slightly
+          spawnInterval = Math.max(350, 700 - (30 - timeLeft)*8);
+        }
+        // move drops
+        for(let i=drops.length-1;i>=0;i--){
+          const d = drops[i];
+          d.y += d.speed * dt;
+          d.x += d.vx * dt;
+          d.vx *= 0.998;
+          // sink off-screen
+          if(d.y - d.size > canvas._h + 60){
+            drops.splice(i,1);
+            // clean drop missed: small penalty (optional)
+            if(!d.polluted){
+              // missing a clean drop reduces small % of water (simulates lost opportunity)
+              waterPercent = Math.max(0, waterPercent - 1.2);
+            }
+          }
+          // keep inside horizontally
+          if(d.x < d.size) d.x = d.size;
+          if(d.x > canvas._w - d.size) d.x = canvas._w - d.size;
+        }
+      }
+
+      function render(){
+        // clear
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        // background subtle ripples
+        ctx.save();
+        ctx.fillStyle = '#f3fbff';
+        ctx.fillRect(0,0,canvas._w,canvas._h);
+        ctx.restore();
+
+        // draw jerrycan area at bottom (visual only)
+        const canW = 120; const canH = 64;
+        const canX = canvas._w/2 - canW/2;
+        const canY = canvas._h - canH - 8;
+        // shadow
+        ctx.save();
+        ctx.fillStyle = 'rgba(7,38,58,0.04)';
+        ctx.fillRect(canX+6,canY+canH+8,canW-8,6);
+        ctx.restore();
+        // jerrycan body
+        ctx.save();
+        ctx.fillStyle = '#ffd95a';
+        ctx.fillRect(canX, canY, canW, canH);
+        ctx.fillStyle = '#ffefc6';
+        ctx.fillRect(canX + canW*0.05, canY + canH*0.18, canW*0.6, canH*0.55);
+        // spout
+        ctx.beginPath();
+        ctx.fillStyle = '#ffd95a';
+        ctx.ellipse(canX + canW - 6, canY + 10, 6, 8, 0.6, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        // draw drops
+        for(const d of drops) drawDrop(d);
+
+        // HUD: small crosshair where pointer is? (skip)
+
+      }
+
+      // main loop via requestAnimationFrame
+      let lastFrame = performance.now();
+      function loop(now){
+        const dt = Math.min(0.05, (now - lastFrame)/1000);
+        lastFrame = now;
+        update(dt);
+        render();
+        animationId = requestAnimationFrame(loop);
+      }
+
+      // handle clicks / taps
+      function handlePointer(evt){
+        const rect = canvas.getBoundingClientRect();
+        const x = (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left;
+        const y = (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top;
+        // find topmost drop under point
+        for(let i=drops.length-1;i>=0;i--){
+          const d = drops[i];
+          const dx = d.x - x;
+          const dy = d.y - y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if(dist < d.size*0.9){
+            // clicked
+            if(d.polluted){
+              // negative feedback
+              lives = Math.max(0, lives - 1);
+              waterPercent = Math.max(0, waterPercent - 10);
+              // small flash penalty
+              flashScreen('#fdecea');
+            } else {
+              // positive
+              score += 10;
+              waterPercent = Math.min(100, waterPercent + 6);
+              // reward bounce (remove drop)
+              popEffect(d.x, d.y);
+            }
+            drops.splice(i,1);
+            resetUI();
+            checkGameOver();
+            return;
+          }
+        }
+      }
+
+      // simple flash effect
+      function flashScreen(color='#fff4d9'){
+        const g = document.createElement('div');
+        g.style.position='absolute'; g.style.left=0; g.style.top=0;
+        g.style.width='100%'; g.style.height='100%';
+        g.style.pointerEvents='none';
+        g.style.background=color; g.style.opacity='0.16';
+        g.style.mixBlendMode='screen';
+        g.style.transition='opacity 400ms ease';
+        document.body.appendChild(g);
+        setTimeout(()=> g.style.opacity='0', 40);
+        setTimeout(()=> document.body.removeChild(g), 500);
+      }
+
+      // pop visual effect (temporary circle)
+      function popEffect(x,y){
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.arc(x,y,18,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // timer
+      function startTimer(){
+        timeLeft = roundTime;
+        timerEl.textContent = timeLeft + 's';
+        timerId = setInterval(() => {
+          timeLeft -= 1;
+          if(timeLeft <= 0){
+            timeLeft = 0;
+            endRound();
+          }
+          resetUI();
+        },1000);
+      }
+
+      function stopTimer(){
+        if(timerId) clearInterval(timerId);
+        timerId = null;
+      }
+
+      // round control
+      function startRound(){
+        // reset important state
+        drops = [];
+        lastSpawn = 0; spawnInterval = 700;
+        running = true; score = 0; lives = 3; waterPercent = 0;
+        resetUI();
+        results.classList.remove('show');
+        startTimer();
+        cancelAnimationFrame(animationId);
+        lastFrame = performance.now();
+        animationId = requestAnimationFrame(loop);
+      }
+
+      function endRound(){
+        running = false;
+        stopTimer();
+        cancelAnimationFrame(animationId);
+        // show results, compute ripple coins
+        const coins = Math.max(0, Math.floor(score / 50));
+        results.classList.add('show');
+        resultsTitle.textContent = waterPercent >= 100 ? 'Well Built!' : 'Round Complete';
+        resultsStats.textContent = `Score: ${score} • Water: ${Math.round(waterPercent)}% • Lives: ${lives}`;
+        // small pool of facts to rotate
+        const facts = [
+          'Clean water improves health and reduces child mortality.',
+          'Women and girls often walk miles to collect water — building wells changes lives.',
+          'An investment in water and sanitation reduces health care costs and boosts education.'
+        ];
+        levelFact.textContent = facts[Math.floor(Math.random()*facts.length)];
+        modalCoins.textContent = coins;
+        // store lastCoins for modal usage
+        canvas._lastCoins = coins;
+      }
+
+      function resetGame(){
+        running = false;
+        stopTimer();
+        drops = []; score = 0; lives = 3; waterPercent = 0; timeLeft = roundTime;
+        results.classList.remove('show');
+        resetUI();
+        cancelAnimationFrame(animationId);
+        // clear canvas
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+      }
+
+      function checkGameOver(){
+        if(lives <= 0){
+          endRound();
+        }
+        if(waterPercent >= 100){
+          // auto-complete
+          endRound();
+        }
+      }
+
+      // event handlers
+      canvas.addEventListener('click', handlePointer);
+      canvas.addEventListener('touchstart', (e) => {
+        handlePointer(e); e.preventDefault();
+      }, {passive:false});
+
+      startBtn.addEventListener('click', ()=> {
+        startRound();
+      });
+      resetBtn.addEventListener('click', ()=> resetGame());
+      document.getElementById('jumpToGame').addEventListener('click', ()=> {
+        document.getElementById('gameSection').scrollIntoView({behavior:'smooth', block:'center'});
+      });
+
+      // results actions
+      claimBtn.addEventListener('click', ()=> {
+        openModal();
+      });
+      closeModal.addEventListener('click', ()=> closeModalFn());
+      document.getElementById('closeClaim').addEventListener('click', ()=> closeModalFn());
+      confirmClaim.addEventListener('click', ()=> {
+        // generate a pseudo claim code
+        const code = 'RW-' + Math.random().toString(36).slice(2,7).toUpperCase() + '-25';
+        claimCode.textContent = code;
+        claimCodeArea.style.display = 'block';
+      });
+
+      function openModal(){
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden','false');
+        claimCodeArea.style.display = 'none';
+        claimCode.textContent = '';
+      }
+      function closeModalFn(){
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+      }
+
+      // init UI
+      resetUI();
+
+      // small accessibility: start with focusable canvas
+      canvas.addEventListener('keydown', (e)=> {
+        if(e.key === ' ' || e.key === 'Enter') startRound();
+      });
+
+      // show small guide on load for first-time visitors
+      (function firstHint(){
+        // subtle pulse on start
+        const btn = document.getElementById('startBtn');
+        btn.classList.add('pulse');
+        setTimeout(()=> btn.classList.remove('pulse'), 2500);
+      })();
+
+    })();
+
+    // small "How It Works" modal-like info
+    document.getElementById('howItWorksBtn').addEventListener('click', ()=>{
+      alert('Tap blue water drops to collect clean water (+10 points). Avoid gray polluted drops (they cost water % or lives). Fill the water meter to build a virtual well. Points convert to Ripple Coins for campus rewards.');
+    });
+
+  </script>
+</body>
+</html>
