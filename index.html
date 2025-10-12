@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ripple Effect — charity: water Game Concept</title>
   <meta name="description" content="Ripple Effect — mobile game concept to raise awareness for clean water. Play the mini-game, learn about the mission, and claim campus rewards."/>
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://github.com/rhiannonpickard/Charitywater">
+  <meta property="og:title" content="Ripple Effect — charity: water Game Concept">
+  <meta property="og:description" content="Interactive web game that teaches about clean water access. Tap water drops, fill jerrycans, and earn campus rewards while learning about charity: water's mission.">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630/1ea7ea/ffffff?text=Ripple+Effect+Game">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://github.com/rhiannonpickard/Charitywater">
+  <meta property="twitter:title" content="Ripple Effect — charity: water Game Concept">
+  <meta property="twitter:description" content="Interactive web game that teaches about clean water access. Tap water drops, fill jerrycans, and earn campus rewards.">
+  <meta property="twitter:image" content="https://via.placeholder.com/1200x630/1ea7ea/ffffff?text=Ripple+Effect+Game">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💧</text></svg>">
   <style>
     :root{
       --cw-yellow: #ffd300;
@@ -248,6 +265,135 @@
       font-size:13px;color:var(--muted);
     }
 
+    /* fullscreen button */
+    .fullscreen-btn {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(7,38,58,0.1);
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--cw-dark);
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(7,38,58,0.08);
+    }
+    .fullscreen-btn:hover {
+      background: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(7,38,58,0.12);
+    }
+    .fullscreen-btn:active {
+      transform: translateY(0);
+    }
+
+    /* fullscreen styles */
+    body:fullscreen,
+    html:fullscreen {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    .site:fullscreen {
+      background: var(--cw-dark);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      max-width: none;
+      width: 100vw;
+    }
+    
+    .site:fullscreen > *:not(.grid) {
+      display: none;
+    }
+    
+    .site:fullscreen .grid {
+      grid-template-columns: 1fr;
+      gap: 0;
+      margin: 0;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .site:fullscreen .grid > aside {
+      display: none;
+    }
+    
+    .site:fullscreen .game-wrap {
+      background: transparent;
+      border-radius: 0;
+      padding: 40px;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 1200px;
+      height: 100vh;
+    }
+    
+    .site:fullscreen canvas {
+      max-height: none;
+      height: 75vh;
+      width: auto;
+      max-width: 95vw;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    
+    .site:fullscreen .game-header {
+      color: white;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 800px;
+      font-size: 18px;
+    }
+    
+    .site:fullscreen .small {
+      color: rgba(255,255,255,0.8);
+    }
+    
+    .site:fullscreen .score {
+      color: var(--cw-yellow);
+      font-size: 24px;
+    }
+    
+    .site:fullscreen .btn {
+      background: var(--cw-yellow);
+      color: var(--cw-dark);
+      font-size: 16px;
+      padding: 12px 20px;
+    }
+    
+    .site:fullscreen .results {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 30px;
+      color: var(--cw-dark);
+      margin-top: 20px;
+    }
+    
+    .site:fullscreen .fullscreen-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+    }
+    
+    .site:fullscreen .fullscreen-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
     /* micro-animations */
     .pulse{
       animation:pulse 2s infinite;
@@ -270,7 +416,10 @@
           <div class="small">A charity: water student engagement game</div>
         </div>
       </div>
-      <div style="margin-left:auto" class="small">By <strong>Rhiannon Pickard</strong></div>
+      <div style="margin-left:auto">
+        <a href="preview.html" class="small" style="text-decoration: none; color: var(--muted); margin-right: 12px;">Preview</a>
+        <span class="small">By <strong>Rhiannon Pickard</strong></span>
+      </div>
     </header>
 
     <section class="hero" role="region" aria-label="project overview">
@@ -330,6 +479,9 @@
               </div>
               <div id="timer" class="small">30s</div>
             </div>
+            <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen" aria-label="Toggle fullscreen mode">
+              <span id="fullscreenIcon">⬜</span>
+            </button>
           </div>
 
           <canvas id="gameCanvas" width="720" height="420" aria-label="Ripple Effect game canvas" tabindex="0"></canvas>
@@ -431,26 +583,37 @@
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
 
-      // adapt size responsively
-      function resize(){
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = Math.min(900, Math.floor(rect.width * devicePixelRatio));
-        canvas.height = Math.min(600, Math.floor((rect.height || 420) * devicePixelRatio));
-        ctx.scale(devicePixelRatio, devicePixelRatio);
-      }
-      // initial
+      // Canvas setup and sizing
       const devicePixelRatio = window.devicePixelRatio || 1;
-      // For simplicity, we'll use logical dims for drawing
-      function resetViewport(){
+      
+      function setupCanvas(){
         const rect = canvas.getBoundingClientRect();
-        canvas._w = Math.max(320, rect.width);
-        canvas._h = Math.max(240, rect.height || 420);
+        const displayWidth = rect.width;
+        const displayHeight = rect.height || 420;
+        
+        // Set the internal size to match the display size * device pixel ratio
+        canvas.width = displayWidth * devicePixelRatio;
+        canvas.height = displayHeight * devicePixelRatio;
+        
+        // Scale the context to match device pixel ratio
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        
+        // Set logical dimensions for game calculations
+        canvas._w = displayWidth;
+        canvas._h = displayHeight;
+        
+        // Set the CSS size to match the display size
+        canvas.style.width = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
       }
+      
+      // Initial setup
+      setupCanvas();
+      
+      // Handle window resize
       window.addEventListener('resize', () => {
-        resetViewport();
+        setupCanvas();
       });
-
-      resetViewport();
 
       // Game state
       let running = false;
@@ -588,7 +751,7 @@
 
       function render(){
         // clear
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.clearRect(0,0,canvas._w,canvas._h);
         // background subtle ripples
         ctx.save();
         ctx.fillStyle = '#f3fbff';
@@ -636,16 +799,25 @@
 
       // handle clicks / taps
       function handlePointer(evt){
+        if(!running) return; // Only handle clicks when game is running
+        
+        evt.preventDefault(); // Prevent default touch behavior
+        
         const rect = canvas.getBoundingClientRect();
-        const x = (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left;
-        const y = (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top;
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        
+        // Convert to canvas coordinates
+        const x = (clientX - rect.left) * (canvas._w / rect.width);
+        const y = (clientY - rect.top) * (canvas._h / rect.height);
+        
         // find topmost drop under point
         for(let i=drops.length-1;i>=0;i--){
           const d = drops[i];
           const dx = d.x - x;
           const dy = d.y - y;
           const dist = Math.sqrt(dx*dx + dy*dy);
-          if(dist < d.size*0.9){
+          if(dist < d.size*2.0){ // Much larger hit area for easier gameplay
             // clicked
             if(d.polluted){
               // negative feedback
@@ -659,6 +831,7 @@
               waterPercent = Math.min(100, waterPercent + 6);
               // reward bounce (remove drop)
               popEffect(d.x, d.y);
+              flashScreen('#fff4d9'); // Positive feedback flash
             }
             drops.splice(i,1);
             resetUI();
@@ -717,18 +890,33 @@
         drops = [];
         lastSpawn = 0; spawnInterval = 700;
         running = true; score = 0; lives = 3; waterPercent = 0;
+        timeLeft = roundTime;
         resetUI();
         results.classList.remove('show');
+        
+        // Ensure canvas is properly set up
+        setupCanvas();
+        
+        // Start the game loop
         startTimer();
         cancelAnimationFrame(animationId);
         lastFrame = performance.now();
         animationId = requestAnimationFrame(loop);
+        
+        // Visual feedback that game started
+        startBtn.textContent = 'Playing...';
+        startBtn.disabled = true;
       }
 
       function endRound(){
         running = false;
         stopTimer();
         cancelAnimationFrame(animationId);
+        
+        // Reset button state
+        startBtn.textContent = 'Start Round';
+        startBtn.disabled = false;
+        
         // show results, compute ripple coins
         const coins = Math.max(0, Math.floor(score / 50));
         results.classList.add('show');
@@ -753,8 +941,20 @@
         results.classList.remove('show');
         resetUI();
         cancelAnimationFrame(animationId);
+        
+        // Reset button state
+        startBtn.textContent = 'Start Round';
+        startBtn.disabled = false;
+        
         // clear canvas
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+        setupCanvas(); // Ensure proper canvas setup
+        ctx.clearRect(0,0,canvas._w,canvas._h);
+        
+        // Draw initial background
+        ctx.save();
+        ctx.fillStyle = '#f3fbff';
+        ctx.fillRect(0,0,canvas._w,canvas._h);
+        ctx.restore();
       }
 
       function checkGameOver(){
@@ -781,10 +981,95 @@
         document.getElementById('gameSection').scrollIntoView({behavior:'smooth', block:'center'});
       });
 
+      // Fullscreen functionality
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const fullscreenIcon = document.getElementById('fullscreenIcon');
+      const siteElement = document.getElementById('site');
+
+      fullscreenBtn.addEventListener('click', ()=> {
+        toggleFullscreen();
+      });
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          // Enter fullscreen on the entire site
+          if (siteElement.requestFullscreen) {
+            siteElement.requestFullscreen();
+          } else if (siteElement.webkitRequestFullscreen) {
+            siteElement.webkitRequestFullscreen();
+          } else if (siteElement.msRequestFullscreen) {
+            siteElement.msRequestFullscreen();
+          }
+        } else {
+          // Exit fullscreen
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+      }
+
+      // Update fullscreen icon based on state
+      function updateFullscreenIcon() {
+        if (document.fullscreenElement) {
+          fullscreenIcon.textContent = '⬛'; // Exit fullscreen icon (compress/minimize)
+          fullscreenBtn.title = 'Exit Fullscreen (F)';
+        } else {
+          fullscreenIcon.textContent = '⬜'; // Enter fullscreen icon (expand)
+          fullscreenBtn.title = 'Enter Fullscreen (F)';
+        }
+      }
+
+      // Listen for fullscreen changes
+      document.addEventListener('fullscreenchange', ()=> {
+        updateFullscreenIcon();
+        // Recalculate canvas size when entering/exiting fullscreen
+        setTimeout(setupCanvas, 100);
+      });
+      document.addEventListener('webkitfullscreenchange', ()=> {
+        updateFullscreenIcon();
+        setTimeout(setupCanvas, 100);
+      });
+      document.addEventListener('msfullscreenchange', ()=> {
+        updateFullscreenIcon();
+        setTimeout(setupCanvas, 100);
+      });
+
+      // Keyboard shortcut for fullscreen (F key)
+      document.addEventListener('keydown', (e)=> {
+        if (e.key === 'f' || e.key === 'F') {
+          if (e.target === canvas || siteElement.contains(e.target)) {
+            e.preventDefault();
+            toggleFullscreen();
+          }
+        }
+      });
+
       // results actions
       claimBtn.addEventListener('click', ()=> {
         openModal();
       });
+      
+      // Share button handler
+      document.getElementById('shareBtn').addEventListener('click', ()=> {
+        const shareText = `I just scored ${score} points in Ripple Effect! 🌊 Playing games for clean water access. #RippleEffect #CharityWater`;
+        if (navigator.share) {
+          navigator.share({
+            title: 'Ripple Effect Game',
+            text: shareText,
+            url: window.location.href
+          });
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(shareText + ' ' + window.location.href);
+          alert('Score shared to clipboard!');
+        } else {
+          alert(shareText);
+        }
+      });
+      
       closeModal.addEventListener('click', ()=> closeModalFn());
       document.getElementById('closeClaim').addEventListener('click', ()=> closeModalFn());
       confirmClaim.addEventListener('click', ()=> {
@@ -805,8 +1090,39 @@
         modal.setAttribute('aria-hidden','true');
       }
 
-      // init UI
-      resetUI();
+      // Initialize the game
+      function initializeGame(){
+        resetUI();
+        setupCanvas();
+        
+        // Draw initial background
+        ctx.save();
+        ctx.fillStyle = '#f3fbff';
+        ctx.fillRect(0,0,canvas._w,canvas._h);
+        ctx.restore();
+        
+        // Draw initial jerrycan
+        const canW = 120; const canH = 64;
+        const canX = canvas._w/2 - canW/2;
+        const canY = canvas._h - canH - 8;
+        // shadow
+        ctx.save();
+        ctx.fillStyle = 'rgba(7,38,58,0.04)';
+        ctx.fillRect(canX+6,canY+canH+8,canW-8,6);
+        ctx.restore();
+        // jerrycan body
+        ctx.save();
+        ctx.fillStyle = '#ffd95a';
+        ctx.fillRect(canX, canY, canW, canH);
+        ctx.fillStyle = '#ffefc6';
+        ctx.fillRect(canX + canW*0.05, canY + canH*0.18, canW*0.6, canH*0.55);
+        // spout
+        ctx.beginPath();
+        ctx.fillStyle = '#ffd95a';
+        ctx.ellipse(canX + canW - 6, canY + 10, 6, 8, 0.6, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
 
       // small accessibility: start with focusable canvas
       canvas.addEventListener('keydown', (e)=> {
@@ -820,6 +1136,9 @@
         btn.classList.add('pulse');
         setTimeout(()=> btn.classList.remove('pulse'), 2500);
       })();
+
+      // Initialize everything when page loads
+      initializeGame();
 
     })();
 

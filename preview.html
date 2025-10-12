@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ripple Effect - Game Preview</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, sans-serif;
+            background: linear-gradient(135deg, #1ea7ea, #ffd300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: white;
+        }
+        .preview-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(7, 38, 58, 0.2);
+            color: #07263a;
+        }
+        .logo {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffd300, #1ea7ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .tagline {
+            font-size: 18px;
+            color: #6b7b85;
+            margin-bottom: 30px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            padding: 20px;
+            background: #f8fbff;
+            border-radius: 12px;
+            border-left: 4px solid #1ea7ea;
+        }
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .cta {
+            background: #ffd300;
+            color: #07263a;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            box-shadow: 0 6px 16px rgba(255, 211, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+        .cta:hover {
+            transform: translateY(-2px);
+        }
+        .water-drops {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .drop {
+            position: absolute;
+            width: 20px;
+            height: 25px;
+            background: radial-gradient(circle at 30% 30%, #9ee8ff, #20b3e8);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: fall linear infinite;
+            opacity: 0.6;
+        }
+        @keyframes fall {
+            from { transform: translateY(-50px); opacity: 1; }
+            to { transform: translateY(100vh); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="water-drops" id="drops"></div>
+    
+    <div class="preview-card">
+        <div class="logo">💧 Ripple Effect</div>
+        <div class="tagline">charity: water Student Engagement Game</div>
+        
+        <p>An interactive web game that teaches about clean water access while earning campus rewards. Tap water drops, fill jerrycans, and make a difference!</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎮</div>
+                <strong>Canvas Gaming</strong><br>
+                Smooth 60fps gameplay with touch support
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <strong>Mobile First</strong><br>
+                Responsive design for all devices
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🏆</div>
+                <strong>Campus Rewards</strong><br>
+                Earn Ripple Coins for real benefits
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📚</div>
+                <strong>Educational</strong><br>
+                Learn about water access challenges
+            </div>
+        </div>
+        
+        <a href="index.html" class="cta">Play the Game →</a>
+        
+        <div style="margin-top: 30px; font-size: 14px; color: #6b7b85;">
+            Built by Rhiannon Pickard • Open Source • HTML5/Canvas
+        </div>
+    </div>
+
+    <script>
+        // Create falling water drops animation
+        function createDrop() {
+            const drop = document.createElement('div');
+            drop.className = 'drop';
+            drop.style.left = Math.random() * 100 + '%';
+            drop.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            drop.style.animationDelay = Math.random() * 2 + 's';
+            document.getElementById('drops').appendChild(drop);
+            
+            setTimeout(() => {
+                drop.remove();
+            }, 5000);
+        }
+        
+        // Create drops periodically
+        setInterval(createDrop, 300);
+        
+        // Create initial drops
+        for(let i = 0; i < 5; i++) {
+            setTimeout(createDrop, i * 200);
+        }
+    </script>
+</body>
+</html>
