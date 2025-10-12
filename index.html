@@ -276,10 +276,10 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 16px;
       color: var(--cw-dark);
       transition: all 0.2s ease;
       box-shadow: 0 2px 8px rgba(7,38,58,0.08);
+      padding: 0;
     }
     .fullscreen-btn:hover {
       background: white;
@@ -288,6 +288,14 @@
     }
     .fullscreen-btn:active {
       transform: translateY(0);
+    }
+    .fullscreen-btn svg {
+      width: 20px;
+      height: 20px;
+      transition: all 0.2s ease;
+    }
+    .fullscreen-btn:hover svg {
+      transform: scale(1.1);
     }
 
     /* fullscreen styles */
@@ -480,7 +488,9 @@
               <div id="timer" class="small">30s</div>
             </div>
             <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen" aria-label="Toggle fullscreen mode">
-              <span id="fullscreenIcon">⬜</span>
+              <svg id="fullscreenIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+              </svg>
             </button>
           </div>
 
@@ -656,18 +666,25 @@
       // Utility: random number
       function rand(min,max){ return Math.random()*(max-min)+min }
 
-      // Drop prototype
+      // Enhanced drop prototype with realistic physics
       function createDrop(isPolluted){
-        const size = isPolluted ? rand(18,26) : rand(12,22);
-        const x = rand(size, canvas._w - size);
-        const speed = isPolluted ? rand(90,160) : rand(70,140);
-        // color
+        const size = isPolluted ? rand(24,35) : rand(18,28); // Made drops bigger
+        const x = rand(size * 2, canvas._w - size * 2);
+        const speed = isPolluted ? rand(40,60) : rand(30,50); // Made drops fall slower
+        
         return {
-          x, y:-size, size, speed,
+          x, y: -size * 2, size, speed,
           polluted: !!isPolluted,
-          vx: rand(-10,10),
-          // simple bob for clean drops
-          birth: Date.now()
+          vx: rand(-5,5), // Reduced horizontal movement
+          rotation: rand(0, Math.PI * 2),
+          rotationSpeed: rand(-0.03, 0.03), // Slower rotation
+          birth: Date.now(),
+          // Add realistic physics
+          gravity: isPolluted ? 90 : 75, // Reduced gravity for slower falling
+          drag: 0.999,
+          // Visual properties
+          opacity: isPolluted ? rand(0.8, 1.0) : 1.0,
+          trail: []
         };
       }
 
@@ -679,43 +696,125 @@
         drops.push(createDrop(polluted));
       }
 
-      // draw drop
+      // draw realistic water drop
       function drawDrop(drop){
         const x = drop.x; const y = drop.y; const r = drop.size;
+        const age = (Date.now() - drop.birth) / 1000;
+        
         ctx.save();
-        ctx.beginPath();
-        // draw teardrop shape
-        const grad = ctx.createRadialGradient(x - r*0.25, y - r*0.4, r*0.1, x, y, r*1.2);
+        
+        // Add subtle wobble animation
+        const wobble = Math.sin(age * 6) * 0.5;
+        ctx.translate(wobble, 0);
+        
         if(drop.polluted){
-          grad.addColorStop(0,'#5a5a5a');
-          grad.addColorStop(1,'#2b2b2b');
-          ctx.fillStyle = grad;
-          ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+          // Polluted water drop - more irregular shape
+          drawPollutedDrop(x, y, r, age);
         } else {
-          grad.addColorStop(0,'#9ee8ff');
-          grad.addColorStop(1,'#20b3e8');
-          ctx.fillStyle = grad;
-          ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+          // Clean water drop - perfect teardrop
+          drawCleanDrop(x, y, r, age);
         }
-        ctx.moveTo(x,y);
-        // teardrop via arc + triangle tip
-        ctx.arc(x, y, r, 0, Math.PI*2);
-        ctx.fill();
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        // small shine for clean drops
-        if(!drop.polluted){
-          ctx.beginPath();
-          ctx.fillStyle = 'rgba(255,255,255,0.6)';
-          ctx.ellipse(x - r*0.25, y - r*0.3, r*0.28, r*0.18, -0.5, 0, Math.PI*2);
-          ctx.fill();
-        } else {
-          ctx.beginPath();
-          ctx.fillStyle = 'rgba(0,0,0,0.12)';
-          ctx.ellipse(x + r*0.15, y - r*0.1, r*0.22, r*0.12, 0.4, 0, Math.PI*2);
-          ctx.fill();
-        }
+        
         ctx.restore();
+      }
+      
+      function drawCleanDrop(x, y, r, age) {
+        // Main drop body - realistic teardrop shape
+        ctx.beginPath();
+        
+        // Complex gradient for depth
+        const mainGrad = ctx.createRadialGradient(x - r*0.3, y - r*0.5, r*0.1, x, y, r*1.4);
+        mainGrad.addColorStop(0, '#e6f9ff');
+        mainGrad.addColorStop(0.3, '#7dd3fc');
+        mainGrad.addColorStop(0.7, '#0ea5e9');
+        mainGrad.addColorStop(1, '#0284c7');
+        
+        // Draw teardrop shape
+        ctx.moveTo(x, y - r);
+        ctx.quadraticCurveTo(x + r*0.8, y - r*0.3, x + r*0.6, y + r*0.4);
+        ctx.quadraticCurveTo(x, y + r*1.2, x - r*0.6, y + r*0.4);
+        ctx.quadraticCurveTo(x - r*0.8, y - r*0.3, x, y - r);
+        
+        ctx.fillStyle = mainGrad;
+        ctx.fill();
+        
+        // Outer glow
+        ctx.shadowColor = 'rgba(14, 165, 233, 0.3)';
+        ctx.shadowBlur = r * 0.5;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Main highlight
+        const highlight = ctx.createRadialGradient(x - r*0.3, y - r*0.4, 0, x - r*0.3, y - r*0.4, r*0.4);
+        highlight.addColorStop(0, 'rgba(255,255,255,0.9)');
+        highlight.addColorStop(1, 'rgba(255,255,255,0)');
+        
+        ctx.beginPath();
+        ctx.ellipse(x - r*0.3, y - r*0.4, r*0.35, r*0.25, -0.3, 0, Math.PI*2);
+        ctx.fillStyle = highlight;
+        ctx.fill();
+        
+        // Secondary highlight
+        ctx.beginPath();
+        ctx.ellipse(x - r*0.15, y - r*0.6, r*0.15, r*0.1, 0.2, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fill();
+        
+        // Subtle rim light
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(x, y - r);
+        ctx.quadraticCurveTo(x + r*0.8, y - r*0.3, x + r*0.6, y + r*0.4);
+        ctx.quadraticCurveTo(x, y + r*1.2, x - r*0.6, y + r*0.4);
+        ctx.quadraticCurveTo(x - r*0.8, y - r*0.3, x, y - r);
+        ctx.stroke();
+      }
+      
+      function drawPollutedDrop(x, y, r, age) {
+        // Polluted drop - darker, more irregular
+        const irregularity = Math.sin(age * 4) * 0.1;
+        
+        ctx.beginPath();
+        
+        // Muddy gradient
+        const pollutedGrad = ctx.createRadialGradient(x - r*0.2, y - r*0.3, r*0.1, x, y, r*1.3);
+        pollutedGrad.addColorStop(0, '#8b7355');
+        pollutedGrad.addColorStop(0.4, '#6b5b47');
+        pollutedGrad.addColorStop(0.8, '#4a4037');
+        pollutedGrad.addColorStop(1, '#2d2621');
+        
+        // Irregular teardrop
+        const points = 8;
+        for(let i = 0; i < points; i++){
+          const angle = (i / points) * Math.PI * 2;
+          const variation = 1 + (Math.sin(angle * 3 + age) * 0.15);
+          const px = x + Math.cos(angle) * r * 0.7 * variation;
+          const py = y + Math.sin(angle) * r * 0.8 * variation;
+          
+          if(i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        
+        ctx.fillStyle = pollutedGrad;
+        ctx.fill();
+        
+        // Dark particles inside
+        for(let i = 0; i < 3; i++){
+          ctx.beginPath();
+          const px = x + (Math.random() - 0.5) * r;
+          const py = y + (Math.random() - 0.5) * r;
+          ctx.arc(px, py, r * 0.08, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,0,0,0.4)';
+          ctx.fill();
+        }
+        
+        // Dull highlight
+        ctx.beginPath();
+        ctx.ellipse(x - r*0.2, y - r*0.3, r*0.2, r*0.12, -0.5, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(139,115,85,0.6)';
+        ctx.fill();
       }
 
       // animation loop
@@ -725,15 +824,42 @@
         if(Date.now() - lastSpawn > spawnInterval){
           spawnDrop();
           lastSpawn = Date.now();
-          // make spawn faster as timer goes down slightly
-          spawnInterval = Math.max(350, 700 - (30 - timeLeft)*8);
+          // make spawn faster as timer goes down slightly (adjusted for slower drops)
+          spawnInterval = Math.max(400, 900 - (30 - timeLeft)*10);
         }
-        // move drops
+        // move drops with enhanced physics
         for(let i=drops.length-1;i>=0;i--){
           const d = drops[i];
+          
+          // Apply gravity and drag
+          d.speed += d.gravity * dt;
+          d.speed *= d.drag;
+          d.vx *= 0.996;
+          
+          // Update position
           d.y += d.speed * dt;
           d.x += d.vx * dt;
-          d.vx *= 0.998;
+          
+          // Add rotation
+          d.rotation += d.rotationSpeed;
+          
+          // Add trail effect for clean drops
+          if(!d.polluted && d.trail.length < 3) {
+            d.trail.push({x: d.x, y: d.y, alpha: 0.5});
+          }
+          
+          // Update trail
+          for(let j = d.trail.length - 1; j >= 0; j--) {
+            d.trail[j].alpha *= 0.9;
+            if(d.trail[j].alpha < 0.1) {
+              d.trail.splice(j, 1);
+            }
+          }
+          
+          // Wind effect (subtle)
+          const windForce = Math.sin(Date.now() * 0.001 + d.x * 0.01) * 5;
+          d.vx += windForce * dt;
+          
           // sink off-screen
           if(d.y - d.size > canvas._h + 60){
             drops.splice(i,1);
@@ -743,48 +869,222 @@
               waterPercent = Math.max(0, waterPercent - 1.2);
             }
           }
-          // keep inside horizontally
-          if(d.x < d.size) d.x = d.size;
-          if(d.x > canvas._w - d.size) d.x = canvas._w - d.size;
+          
+          // bounce off walls with energy loss
+          if(d.x - d.size < 0) {
+            d.x = d.size;
+            d.vx = Math.abs(d.vx) * 0.7;
+          }
+          if(d.x + d.size > canvas._w) {
+            d.x = canvas._w - d.size;
+            d.vx = -Math.abs(d.vx) * 0.7;
+          }
         }
       }
 
       function render(){
         // clear
         ctx.clearRect(0,0,canvas._w,canvas._h);
-        // background subtle ripples
-        ctx.save();
-        ctx.fillStyle = '#f3fbff';
-        ctx.fillRect(0,0,canvas._w,canvas._h);
-        ctx.restore();
+        
+        // Enhanced background with sky gradient and clouds
+        drawBackground();
+        
+        // draw realistic jerrycan
+        drawJerryCan();
 
-        // draw jerrycan area at bottom (visual only)
-        const canW = 120; const canH = 64;
-        const canX = canvas._w/2 - canW/2;
-        const canY = canvas._h - canH - 8;
-        // shadow
-        ctx.save();
-        ctx.fillStyle = 'rgba(7,38,58,0.04)';
-        ctx.fillRect(canX+6,canY+canH+8,canW-8,6);
-        ctx.restore();
-        // jerrycan body
-        ctx.save();
-        ctx.fillStyle = '#ffd95a';
-        ctx.fillRect(canX, canY, canW, canH);
-        ctx.fillStyle = '#ffefc6';
-        ctx.fillRect(canX + canW*0.05, canY + canH*0.18, canW*0.6, canH*0.55);
-        // spout
-        ctx.beginPath();
-        ctx.fillStyle = '#ffd95a';
-        ctx.ellipse(canX + canW - 6, canY + 10, 6, 8, 0.6, 0, Math.PI*2);
-        ctx.fill();
-        ctx.restore();
-
-        // draw drops
+        // draw drops with depth sorting
+        drops.sort((a, b) => a.y - b.y);
         for(const d of drops) drawDrop(d);
-
-        // HUD: small crosshair where pointer is? (skip)
-
+        
+        // Add water level indicator inside jerrycan
+        drawWaterLevel();
+        
+        // Add particle effects for positive feedback
+        if(running) drawParticleEffects();
+      }
+      
+      function drawBackground() {
+        // Sky gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas._h);
+        skyGrad.addColorStop(0, '#87ceeb');
+        skyGrad.addColorStop(0.3, '#b8e6ff');
+        skyGrad.addColorStop(1, '#e8f4fd');
+        
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, canvas._w, canvas._h);
+        
+        // Simple clouds
+        drawCloud(canvas._w * 0.2, canvas._h * 0.15, 40);
+        drawCloud(canvas._w * 0.7, canvas._h * 0.25, 35);
+        drawCloud(canvas._w * 0.85, canvas._h * 0.1, 25);
+      }
+      
+      function drawCloud(x, y, size) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        
+        // Cloud made of overlapping circles
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.8, y, size * 0.8, 0, Math.PI * 2);
+        ctx.arc(x - size * 0.6, y, size * 0.7, 0, Math.PI * 2);
+        ctx.arc(x, y - size * 0.5, size * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+      }
+      
+      function drawJerryCan() {
+        const canW = 140; const canH = 80;
+        const canX = canvas._w/2 - canW/2;
+        const canY = canvas._h - canH - 12;
+        
+        ctx.save();
+        
+        // Enhanced shadow with blur
+        ctx.shadowColor = 'rgba(7,38,58,0.2)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        
+        // Main jerrycan body with gradient
+        const canGrad = ctx.createLinearGradient(canX, canY, canX + canW, canY + canH);
+        canGrad.addColorStop(0, '#ffed4e');
+        canGrad.addColorStop(0.5, '#ffd700');
+        canGrad.addColorStop(1, '#b8860b');
+        
+        ctx.beginPath();
+        ctx.roundRect(canX, canY, canW, canH, 8);
+        ctx.fillStyle = canGrad;
+        ctx.fill();
+        
+        // Reset shadow
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Handle on the side
+        ctx.beginPath();
+        ctx.strokeStyle = '#b8860b';
+        ctx.lineWidth = 4;
+        ctx.arc(canX + canW + 5, canY + canH/2, 12, -Math.PI/3, Math.PI/3);
+        ctx.stroke();
+        
+        // Spout
+        const spoutGrad = ctx.createLinearGradient(canX + canW - 15, canY, canX + canW + 5, canY + 20);
+        spoutGrad.addColorStop(0, '#ffd700');
+        spoutGrad.addColorStop(1, '#b8860b');
+        
+        ctx.beginPath();
+        ctx.ellipse(canX + canW - 8, canY + 12, 8, 12, 0.3, 0, Math.PI*2);
+        ctx.fillStyle = spoutGrad;
+        ctx.fill();
+        
+        // Cap on spout
+        ctx.beginPath();
+        ctx.arc(canX + canW - 8, canY + 8, 4, 0, Math.PI*2);
+        ctx.fillStyle = '#8b6914';
+        ctx.fill();
+        
+        // Highlight on can
+        const highlightGrad = ctx.createLinearGradient(canX, canY, canX + canW*0.3, canY + canH*0.3);
+        highlightGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
+        highlightGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        
+        ctx.beginPath();
+        ctx.roundRect(canX + 5, canY + 5, canW*0.25, canH*0.4, 4);
+        ctx.fillStyle = highlightGrad;
+        ctx.fill();
+        
+        // charity: water label
+        ctx.fillStyle = '#07263a';
+        ctx.font = 'bold 10px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('charity: water', canX + canW/2, canY + canH/2 + 3);
+        
+        ctx.restore();
+      }
+      
+      function drawWaterLevel() {
+        if(waterPercent <= 0) return;
+        
+        const canW = 140; const canH = 80;
+        const canX = canvas._w/2 - canW/2;
+        const canY = canvas._h - canH - 12;
+        
+        // Water inside jerrycan
+        const waterH = (canH - 10) * (waterPercent / 100);
+        const waterY = canY + canH - 5 - waterH;
+        
+        ctx.save();
+        
+        // Clip to jerrycan shape
+        ctx.beginPath();
+        ctx.roundRect(canX + 5, canY + 5, canW - 10, canH - 10, 4);
+        ctx.clip();
+        
+        // Water gradient
+        const waterGrad = ctx.createLinearGradient(0, waterY, 0, waterY + waterH);
+        waterGrad.addColorStop(0, 'rgba(30,167,234,0.3)');
+        waterGrad.addColorStop(1, 'rgba(30,167,234,0.6)');
+        
+        ctx.fillStyle = waterGrad;
+        ctx.fillRect(canX + 5, waterY, canW - 10, waterH);
+        
+        // Water surface with animation
+        const waveOffset = Date.now() * 0.003;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(30,167,234,0.8)';
+        ctx.lineWidth = 2;
+        
+        for(let x = canX + 5; x < canX + canW - 5; x += 2) {
+          const wave = Math.sin((x - canX) * 0.1 + waveOffset) * 1;
+          if(x === canX + 5) ctx.moveTo(x, waterY + wave);
+          else ctx.lineTo(x, waterY + wave);
+        }
+        ctx.stroke();
+        
+        ctx.restore();
+      }
+      
+      // Simple particle system for visual feedback
+      let particles = [];
+      
+      function addParticle(x, y, type = 'positive') {
+        particles.push({
+          x, y, 
+          vx: (Math.random() - 0.5) * 60,
+          vy: -Math.random() * 80 - 20,
+          life: 1.0,
+          maxLife: 1.0,
+          size: Math.random() * 3 + 2,
+          color: type === 'positive' ? '#1ea7ea' : '#ff6b6b'
+        });
+      }
+      
+      function drawParticleEffects() {
+        for(let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          
+          // Update particle
+          p.x += p.vx * 0.016;
+          p.y += p.vy * 0.016;
+          p.vy += 200 * 0.016; // gravity
+          p.life -= 0.016;
+          
+          if(p.life <= 0) {
+            particles.splice(i, 1);
+            continue;
+          }
+          
+          // Draw particle
+          ctx.save();
+          const alpha = p.life / p.maxLife;
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
       }
 
       // main loop via requestAnimationFrame
@@ -817,7 +1117,7 @@
           const dx = d.x - x;
           const dy = d.y - y;
           const dist = Math.sqrt(dx*dx + dy*dy);
-          if(dist < d.size*2.0){ // Much larger hit area for easier gameplay
+          if(dist < d.size*1.8){ // Adjusted hit area for larger drops
             // clicked
             if(d.polluted){
               // negative feedback
@@ -825,6 +1125,10 @@
               waterPercent = Math.max(0, waterPercent - 10);
               // small flash penalty
               flashScreen('#fdecea');
+              // Add negative particles
+              for(let i = 0; i < 5; i++) {
+                addParticle(d.x + (Math.random() - 0.5) * 20, d.y + (Math.random() - 0.5) * 20, 'negative');
+              }
             } else {
               // positive
               score += 10;
@@ -832,6 +1136,10 @@
               // reward bounce (remove drop)
               popEffect(d.x, d.y);
               flashScreen('#fff4d9'); // Positive feedback flash
+              // Add positive particles
+              for(let i = 0; i < 8; i++) {
+                addParticle(d.x + (Math.random() - 0.5) * 30, d.y + (Math.random() - 0.5) * 30, 'positive');
+              }
             }
             drops.splice(i,1);
             resetUI();
@@ -855,14 +1163,48 @@
         setTimeout(()=> document.body.removeChild(g), 500);
       }
 
-      // pop visual effect (temporary circle)
-      function popEffect(x,y){
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.arc(x,y,18,0,Math.PI*2);
-        ctx.fill();
-        ctx.restore();
+      // Enhanced pop visual effect
+      function popEffect(x, y){
+        // Create expanding ripple effect
+        const ripples = [];
+        for(let i = 0; i < 3; i++) {
+          ripples.push({
+            x, y,
+            radius: 0,
+            maxRadius: 20 + i * 8,
+            alpha: 1,
+            delay: i * 100
+          });
+        }
+        
+        function animateRipples() {
+          ctx.save();
+          
+          for(const ripple of ripples) {
+            if(Date.now() > ripple.startTime + ripple.delay) {
+              ripple.radius += 1.5;
+              ripple.alpha = 1 - (ripple.radius / ripple.maxRadius);
+              
+              if(ripple.radius < ripple.maxRadius) {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(30,167,234,${ripple.alpha * 0.8})`;
+                ctx.lineWidth = 2;
+                ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI*2);
+                ctx.stroke();
+              }
+            }
+          }
+          
+          ctx.restore();
+        }
+        
+        // Start animation
+        ripples.forEach(r => r.startTime = Date.now());
+        
+        // Add to animation queue (simplified for this demo)
+        setTimeout(() => animateRipples(), 16);
+        setTimeout(() => animateRipples(), 32);
+        setTimeout(() => animateRipples(), 48);
       }
 
       // timer
@@ -946,15 +1288,9 @@
         startBtn.textContent = 'Start Round';
         startBtn.disabled = false;
         
-        // clear canvas
+        // clear canvas and show welcome screen
         setupCanvas(); // Ensure proper canvas setup
-        ctx.clearRect(0,0,canvas._w,canvas._h);
-        
-        // Draw initial background
-        ctx.save();
-        ctx.fillStyle = '#f3fbff';
-        ctx.fillRect(0,0,canvas._w,canvas._h);
-        ctx.restore();
+        drawWelcomeScreen();
       }
 
       function checkGameOver(){
@@ -1014,11 +1350,14 @@
 
       // Update fullscreen icon based on state
       function updateFullscreenIcon() {
+        const iconPath = fullscreenIcon.querySelector('path');
         if (document.fullscreenElement) {
-          fullscreenIcon.textContent = '⬛'; // Exit fullscreen icon (compress/minimize)
+          // Exit fullscreen icon (arrows pointing inward)
+          iconPath.setAttribute('d', 'M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z');
           fullscreenBtn.title = 'Exit Fullscreen (F)';
         } else {
-          fullscreenIcon.textContent = '⬜'; // Enter fullscreen icon (expand)
+          // Enter fullscreen icon (arrows pointing outward)
+          iconPath.setAttribute('d', 'M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
           fullscreenBtn.title = 'Enter Fullscreen (F)';
         }
       }
@@ -1095,32 +1434,130 @@
         resetUI();
         setupCanvas();
         
-        // Draw initial background
-        ctx.save();
-        ctx.fillStyle = '#f3fbff';
-        ctx.fillRect(0,0,canvas._w,canvas._h);
-        ctx.restore();
+        // Draw welcome screen
+        drawWelcomeScreen();
+      }
+      
+      function drawWelcomeScreen() {
+        // Enhanced background with sky gradient and clouds
+        drawBackground();
         
-        // Draw initial jerrycan
-        const canW = 120; const canH = 64;
-        const canX = canvas._w/2 - canW/2;
-        const canY = canvas._h - canH - 8;
-        // shadow
+        // Draw "charity: water" branding in center
         ctx.save();
-        ctx.fillStyle = 'rgba(7,38,58,0.04)';
-        ctx.fillRect(canX+6,canY+canH+8,canW-8,6);
+        
+        // Main title
+        ctx.fillStyle = '#07263a';
+        ctx.font = 'bold 32px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        const centerX = canvas._w / 2;
+        const centerY = canvas._h / 2 - 20;
+        
+        // Add text shadow for depth
+        ctx.shadowColor = 'rgba(7,38,58,0.2)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillText('charity: water', centerX, centerY);
+        
+        // Reset shadow
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Subtitle
+        ctx.fillStyle = '#1ea7ea';
+        ctx.font = '16px Inter, sans-serif';
+        ctx.fillText('Ripple Effect Game', centerX, centerY + 40);
+        
+        // Water drop icon above text
+        drawWaterDropIcon(centerX, centerY - 60);
+        
+        // Start instruction
+        ctx.fillStyle = '#6b7b85';
+        ctx.font = '14px Inter, sans-serif';
+        ctx.fillText('Click "Start Round" to begin playing', centerX, centerY + 80);
+        
+        // Small decorative jerrycan at bottom
+        drawMiniJerryCan();
+        
         ctx.restore();
-        // jerrycan body
+      }
+      
+      function drawWaterDropIcon(x, y) {
         ctx.save();
-        ctx.fillStyle = '#ffd95a';
-        ctx.fillRect(canX, canY, canW, canH);
-        ctx.fillStyle = '#ffefc6';
-        ctx.fillRect(canX + canW*0.05, canY + canH*0.18, canW*0.6, canH*0.55);
-        // spout
+        
+        // Large decorative water drop
+        const r = 25;
+        
+        // Gradient for the drop
+        const dropGrad = ctx.createRadialGradient(x - r*0.3, y - r*0.5, r*0.1, x, y, r*1.4);
+        dropGrad.addColorStop(0, '#e6f9ff');
+        dropGrad.addColorStop(0.3, '#7dd3fc');
+        dropGrad.addColorStop(0.7, '#0ea5e9');
+        dropGrad.addColorStop(1, '#0284c7');
+        
+        // Draw teardrop shape
         ctx.beginPath();
-        ctx.fillStyle = '#ffd95a';
-        ctx.ellipse(canX + canW - 6, canY + 10, 6, 8, 0.6, 0, Math.PI*2);
+        ctx.moveTo(x, y - r);
+        ctx.quadraticCurveTo(x + r*0.8, y - r*0.3, x + r*0.6, y + r*0.4);
+        ctx.quadraticCurveTo(x, y + r*1.2, x - r*0.6, y + r*0.4);
+        ctx.quadraticCurveTo(x - r*0.8, y - r*0.3, x, y - r);
+        
+        ctx.fillStyle = dropGrad;
         ctx.fill();
+        
+        // Add glow effect
+        ctx.shadowColor = 'rgba(14, 165, 233, 0.4)';
+        ctx.shadowBlur = 15;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Highlight
+        const highlight = ctx.createRadialGradient(x - r*0.3, y - r*0.4, 0, x - r*0.3, y - r*0.4, r*0.4);
+        highlight.addColorStop(0, 'rgba(255,255,255,0.9)');
+        highlight.addColorStop(1, 'rgba(255,255,255,0)');
+        
+        ctx.beginPath();
+        ctx.ellipse(x - r*0.3, y - r*0.4, r*0.35, r*0.25, -0.3, 0, Math.PI*2);
+        ctx.fillStyle = highlight;
+        ctx.fill();
+        
+        ctx.restore();
+      }
+      
+      function drawMiniJerryCan() {
+        const canW = 80; const canH = 50;
+        const canX = canvas._w/2 - canW/2;
+        const canY = canvas._h - canH - 20;
+        
+        ctx.save();
+        ctx.globalAlpha = 0.7;
+        
+        // Small jerrycan
+        const canGrad = ctx.createLinearGradient(canX, canY, canX + canW, canY + canH);
+        canGrad.addColorStop(0, '#ffed4e');
+        canGrad.addColorStop(0.5, '#ffd700');
+        canGrad.addColorStop(1, '#b8860b');
+        
+        ctx.beginPath();
+        ctx.roundRect(canX, canY, canW, canH, 6);
+        ctx.fillStyle = canGrad;
+        ctx.fill();
+        
+        // Handle
+        ctx.beginPath();
+        ctx.strokeStyle = '#b8860b';
+        ctx.lineWidth = 3;
+        ctx.arc(canX + canW + 3, canY + canH/2, 8, -Math.PI/3, Math.PI/3);
+        ctx.stroke();
+        
+        // Spout
+        ctx.beginPath();
+        ctx.ellipse(canX + canW - 6, canY + 8, 5, 8, 0.3, 0, Math.PI*2);
+        ctx.fillStyle = '#ffd700';
+        ctx.fill();
+        
         ctx.restore();
       }
 
