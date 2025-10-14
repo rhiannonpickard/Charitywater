@@ -591,30 +591,48 @@
 
     (function(){
       const canvas = document.getElementById('gameCanvas');
+      if (!canvas) {
+        console.error('Canvas element not found!');
+        return;
+      }
+      
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.error('2D context not available!');
+        return;
+      }
+      
+      console.log('Canvas and context initialized successfully');
 
       // Canvas setup and sizing
       const devicePixelRatio = window.devicePixelRatio || 1;
       
       function setupCanvas(){
-        const rect = canvas.getBoundingClientRect();
-        const displayWidth = rect.width;
-        const displayHeight = rect.height || 420;
-        
-        // Set the internal size to match the display size * device pixel ratio
-        canvas.width = displayWidth * devicePixelRatio;
-        canvas.height = displayHeight * devicePixelRatio;
-        
-        // Scale the context to match device pixel ratio
-        ctx.scale(devicePixelRatio, devicePixelRatio);
-        
-        // Set logical dimensions for game calculations
-        canvas._w = displayWidth;
-        canvas._h = displayHeight;
-        
-        // Set the CSS size to match the display size
-        canvas.style.width = displayWidth + 'px';
-        canvas.style.height = displayHeight + 'px';
+        try {
+          const rect = canvas.getBoundingClientRect();
+          const displayWidth = rect.width || 720;
+          const displayHeight = rect.height || 420;
+          
+          // Set the internal size to match the display size * device pixel ratio
+          canvas.width = displayWidth * devicePixelRatio;
+          canvas.height = displayHeight * devicePixelRatio;
+          
+          // Scale the context to match device pixel ratio
+          ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform first
+          ctx.scale(devicePixelRatio, devicePixelRatio);
+          
+          // Set logical dimensions for game calculations
+          canvas._w = displayWidth;
+          canvas._h = displayHeight;
+          
+          // Set the CSS size to match the display size
+          canvas.style.width = displayWidth + 'px';
+          canvas.style.height = displayHeight + 'px';
+          
+          console.log('Canvas setup:', {width: canvas._w, height: canvas._h});
+        } catch(e) {
+          console.error('Canvas setup error:', e);
+        }
       }
       
       // Initial setup
@@ -883,24 +901,30 @@
       }
 
       function render(){
-        // clear
-        ctx.clearRect(0,0,canvas._w,canvas._h);
-        
-        // Enhanced background with sky gradient and clouds
-        drawBackground();
-        
-        // draw realistic jerrycan
-        drawJerryCan();
+        try {
+          // clear
+          ctx.clearRect(0,0,canvas._w,canvas._h);
+          
+          // Enhanced background with sky gradient and clouds
+          drawBackground();
+          
+          // draw realistic jerrycan
+          drawJerryCan();
 
-        // draw drops with depth sorting
-        drops.sort((a, b) => a.y - b.y);
-        for(const d of drops) drawDrop(d);
-        
-        // Add water level indicator inside jerrycan
-        drawWaterLevel();
-        
-        // Add particle effects for positive feedback
-        if(running) drawParticleEffects();
+          // draw drops with depth sorting
+          if(drops && drops.length > 0) {
+            drops.sort((a, b) => a.y - b.y);
+            for(const d of drops) drawDrop(d);
+          }
+          
+          // Add water level indicator inside jerrycan
+          drawWaterLevel();
+          
+          // Add particle effects for positive feedback
+          if(running) drawParticleEffects();
+        } catch(e) {
+          console.error('Render error:', e);
+        }
       }
       
       function drawBackground() {
@@ -953,7 +977,12 @@
         canGrad.addColorStop(1, '#b8860b');
         
         ctx.beginPath();
-        ctx.roundRect(canX, canY, canW, canH, 8);
+        // Use fallback for roundRect if not available
+        if (ctx.roundRect) {
+          ctx.roundRect(canX, canY, canW, canH, 8);
+        } else {
+          ctx.rect(canX, canY, canW, canH);
+        }
         ctx.fillStyle = canGrad;
         ctx.fill();
         
@@ -1228,26 +1257,37 @@
 
       // round control
       function startRound(){
-        // reset important state
-        drops = [];
-        lastSpawn = 0; spawnInterval = 700;
-        running = true; score = 0; lives = 3; waterPercent = 0;
-        timeLeft = roundTime;
-        resetUI();
-        results.classList.remove('show');
-        
-        // Ensure canvas is properly set up
-        setupCanvas();
-        
-        // Start the game loop
-        startTimer();
-        cancelAnimationFrame(animationId);
-        lastFrame = performance.now();
-        animationId = requestAnimationFrame(loop);
-        
-        // Visual feedback that game started
-        startBtn.textContent = 'Playing...';
-        startBtn.disabled = true;
+        try {
+          console.log('Starting game round...');
+          
+          // reset important state
+          drops = [];
+          lastSpawn = 0; spawnInterval = 900; // Updated spawn interval
+          running = true; score = 0; lives = 3; waterPercent = 0;
+          timeLeft = roundTime;
+          resetUI();
+          results.classList.remove('show');
+          
+          // Ensure canvas is properly set up
+          setupCanvas();
+          
+          // Start the game loop
+          startTimer();
+          cancelAnimationFrame(animationId);
+          lastFrame = performance.now();
+          animationId = requestAnimationFrame(loop);
+          
+          // Visual feedback that game started
+          startBtn.textContent = 'Playing...';
+          startBtn.disabled = true;
+          
+          console.log('Game started successfully');
+        } catch(e) {
+          console.error('Error starting game:', e);
+          // Reset button state on error
+          startBtn.textContent = 'Start Round';
+          startBtn.disabled = false;
+        }
       }
 
       function endRound(){
@@ -1541,7 +1581,12 @@
         canGrad.addColorStop(1, '#b8860b');
         
         ctx.beginPath();
-        ctx.roundRect(canX, canY, canW, canH, 6);
+        // Use fallback for roundRect if not available
+        if (ctx.roundRect) {
+          ctx.roundRect(canX, canY, canW, canH, 6);
+        } else {
+          ctx.rect(canX, canY, canW, canH);
+        }
         ctx.fillStyle = canGrad;
         ctx.fill();
         
@@ -1575,7 +1620,16 @@
       })();
 
       // Initialize everything when page loads
-      initializeGame();
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeGame();
+      });
+      
+      // Also initialize if DOM is already loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeGame);
+      } else {
+        initializeGame();
+      }
 
     })();
 
