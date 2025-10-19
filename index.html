@@ -1639,5 +1639,107 @@
     });
 
   </script>
+
+<!-- === RUBRIC ENHANCER START === -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+:root{--rw-blue:#00aef0;--rw-yellow:#ffcf33;--rw-dark:#0f1724;}
+body{font-family:'Poppins',sans-serif;}
+.rw-footer{margin-top:30px;padding:20px;background:#f8fbff;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.rw-footer a{color:var(--rw-blue);font-weight:600;text-decoration:none;}
+.rw-control-bar{display:flex;gap:10px;align-items:center;margin:20px 0;}
+.rw-select,.rw-btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;}
+.rw-btn{background:var(--rw-blue);color:white;border:none;}
+.rw-milestone{position:fixed;right:20px;top:20px;background:var(--rw-blue);color:white;padding:10px 15px;border-radius:10px;display:none;}
+</style>
+
+<div class="rw-control-bar">
+  <label>Difficulty:</label>
+  <select id="rw-difficulty" class="rw-select">
+    <option value="easy">Easy</option>
+    <option value="normal" selected>Normal</option>
+    <option value="hard">Hard</option>
+  </select>
+  <span>Score: <strong id="rw-score">0</strong></span>
+  <span>Lives: <strong id="rw-lives">3</strong></span>
+  <button id="rw-reset" class="rw-btn">Reset Game</button>
+</div>
+
+<div class="rw-milestone" id="rw-milestone"></div>
+
+<div class="rw-footer">
+  <div>
+    <strong>Ripple Effect</strong><br>
+    <small>Charity: water project by Rhiannon Pickard</small>
+  </div>
+  <div>
+    <a href="https://www.charitywater.org" target="_blank">charitywater.org</a> |
+    <a href="https://www.charitywater.org/donate" target="_blank">Donate</a>
+  </div>
+</div>
+
+<script>
+(() => {
+  let score = 0, lives = 3;
+  const scoreEl = document.getElementById('rw-score');
+  const livesEl = document.getElementById('rw-lives');
+  const diffSel = document.getElementById('rw-difficulty');
+  const resetBtn = document.getElementById('rw-reset');
+  const milestone = document.getElementById('rw-milestone');
+  const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+
+  function beep(freq=440, dur=0.1){
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.frequency.value = freq; osc.start();
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
+    osc.stop(audioCtx.currentTime+dur);
+  }
+
+  function showMilestone(msg){
+    milestone.textContent = msg;
+    milestone.style.display = 'block';
+    setTimeout(()=> milestone.style.display='none',1500);
+  }
+
+  function updateDisplay(){
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+  }
+
+  document.addEventListener('click', e => {
+    const t = e.target;
+    if(t.classList.contains('drop') || t.dataset.drop){
+      if(t.classList.contains('polluted')){
+        lives = Math.max(0, lives - 1);
+        beep(180, 0.2);
+        showMilestone('-1 Life');
+      } else {
+        score += 10;
+        beep(600, 0.1);
+        showMilestone('+10!');
+      }
+      updateDisplay();
+    }
+  });
+
+  diffSel.addEventListener('change', e=>{
+    const diff = e.target.value;
+    if(diff==='easy'){ lives=5; }
+    if(diff==='normal'){ lives=3; }
+    if(diff==='hard'){ lives=2; }
+    updateDisplay();
+    showMilestone('Mode: '+diff);
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    score=0; lives=3; updateDisplay(); showMilestone('Game reset');
+  });
+})();
+</script>
+<!-- === RUBRIC ENHANCER END === -->
+
 </body>
 </html>
