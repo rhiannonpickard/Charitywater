@@ -3,8 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ripple Effect — charity: water Game</title>
-  <meta name="description" content="Interactive water collection game supporting charity: water's mission"/>
+  <title>Ripple Effect — charity: water Game Concept</title>
+  <meta name="description" content="Ripple Effect — mobile game concept to raise awareness for clean water. Play the mini-game, learn about the mission, and claim campus rewards."/>
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://github.com/rhiannonpickard/Charitywater">
+  <meta property="og:title" content="Ripple Effect — charity: water Game Concept">
+  <meta property="og:description" content="Interactive web game that teaches about clean water access. Tap water drops, fill jerrycans, and earn campus rewards while learning about charity: water's mission.">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630/1ea7ea/ffffff?text=Ripple+Effect+Game">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://github.com/rhiannonpickard/Charitywater">
+  <meta property="twitter:title" content="Ripple Effect — charity: water Game Concept">
+  <meta property="twitter:description" content="Interactive web game that teaches about clean water access. Tap water drops, fill jerrycans, and earn campus rewards.">
+  <meta property="twitter:image" content="https://via.placeholder.com/1200x630/1ea7ea/ffffff?text=Ripple+Effect+Game">
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💧</text></svg>">
@@ -196,10 +210,55 @@
       color:var(--muted);
     }
 
+    /* layout grid for features + wireframes */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:18px;
+      margin-bottom:18px;
+    }
+
+    .wireframe{
+      background:linear-gradient(180deg,#ffffff, #fcfdff);
+      padding:12px;
+      border-radius:12px;
+      border:1px dashed rgba(7,38,58,0.04);
+    }
+    .wireframe .mock{
+      height:260px;
+      border-radius:10px;
+      background:linear-gradient(180deg,#f8fcff,#ffffff);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-weight:600;
+      letter-spacing:0.6px;
+      border:1px solid rgba(7,38,58,0.03);
+    }
+
     /* responsive */
     @media (max-width:900px){
+      .hero{flex-direction:column}
+      .grid{grid-template-columns:1fr}
+      .right{order:2}
+      .left{order:1}
       body{padding:16px}
-      .rw-control-bar{flex-wrap:wrap}
+    }
+
+    /* modal */
+    .modal-backdrop{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(7,38,58,0.4); z-index:9999;
+    }
+    .modal{
+      background:white; padding:18px; border-radius:12px; width:380px; max-width:90%;
+      box-shadow:0 18px 60px rgba(7,38,58,0.2);
+    }
+    .modal h3{margin:0 0 8px 0;}
+    .close-btn{background:transparent;border:0;cursor:pointer;font-size:16px;padding:6px}
+    .leaderboard{
+      margin-top:8px; font-size:13px; color:var(--muted);
     }
 
     .small{
@@ -359,77 +418,168 @@
   <main class="site" id="site">
     <header>
       <div class="logo" aria-label="logo">
-        <div class="logo-mark" aria-hidden="true">💧</div>
+        <div class="logo-mark" aria-hidden="true">RW</div>
         <div>
           <h1>Ripple Effect</h1>
-          <div class="small">charity: water game by Rhiannon Pickard</div>
+          <div class="small">A charity: water student engagement game</div>
         </div>
+      </div>
+      <div style="margin-left:auto">
+        <a href="preview.html" class="small" style="text-decoration: none; color: var(--muted); margin-right: 12px;">Preview</a>
+        <span class="small">By <strong>Rhiannon Pickard</strong></span>
       </div>
     </header>
 
-    <!-- Difficulty Controls (Rubric Requirement) -->
-    <div class="rw-control-bar">
-      <label>Difficulty:</label>
-      <select id="rw-difficulty" class="rw-select">
-        <option value="easy">Easy</option>
-        <option value="normal" selected>Normal</option>
-        <option value="hard">Hard</option>
-      </select>
-      <span>Score: <strong id="rw-score">0</strong></span>
-      <span>Lives: <strong id="rw-lives">3</strong></span>
-      <button id="rw-reset" class="rw-btn">Reset Game</button>
-    </div>
+    <section class="hero" role="region" aria-label="project overview">
+      <div class="left">
+        <span class="tag">Week 1 — Game Concept</span>
+        <p class="summary">
+          Ripple Effect is a fun, mobile-first game that teaches players about clean water access.
+          Tap clean water drops to fill a virtual jerrycan and build wells for villages. Avoid polluted drops.
+          Earn <strong>Ripple Coins</strong> that convert to on-campus rewards and leaderboard recognition.
+        </p>
 
-    <!-- Game Section (Rubric Requirement) -->
-    <section class="card game-wrap" id="gameSection">
-      <div class="game-header">
-        <div class="score" aria-live="polite">Score: <span id="score">0</span></div>
-        <div class="meter">
-          <div class="small">Water</div>
-          <div class="bar" aria-hidden="true">
-            <div class="bar-fill" id="barFill" style="width:0%"></div>
+        <div class="cta-row">
+          <button class="btn btn-play" id="jumpToGame">Play Mini Game</button>
+          <button class="btn btn-learn" id="howItWorksBtn">How It Works</button>
+        </div>
+      </div>
+
+      <aside class="right">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Current Campaign</div>
+              <div style="font-weight:700">#CampusRipples</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Rewards</div>
+              <div style="font-weight:700">Cafeteria discount</div>
+            </div>
           </div>
-          <div id="timer" class="small">30s</div>
+          <div style="margin-top:12px" class="small">Use the game to earn points and unlock exclusive campus offers. Weekly campus leaderboards help increase friendly competition.</div>
         </div>
-        <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen" aria-label="Toggle fullscreen mode">
-          <svg id="fullscreenIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-          </svg>
-        </button>
-      </div>
 
-      <canvas id="gameCanvas" width="720" height="420" aria-label="Ripple Effect game canvas" tabindex="0"></canvas>
-
-      <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
-        <div class="small">Lives: <span id="lives">3</span></div>
-        <div>
-          <button class="btn btn-play" id="startBtn">Start Round</button>
-          <button class="btn btn-learn" id="resetBtn">Reset</button>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Prototype</div>
+              <div style="font-weight:700">Playable Demo</div>
+            </div>
+            <div class="small">30s rounds • Mobile-first</div>
+          </div>
+          <div style="margin-top:8px" class="small">Tip: Click or tap the falling drops. Clean drops give points. Polluted drops reduce water level.</div>
         </div>
-      </div>
 
-      <div class="results" id="results">
-        <div style="font-weight:700" id="resultsTitle">Round Complete</div>
-        <div id="resultsStats" class="small">You scored 0 points.</div>
-        <div class="facts" id="levelFact">Fun fact about water.</div>
-      </div>
+      </aside>
     </section>
 
-    <!-- Game Logic Section (Rubric Requirement) -->
+    <section class="grid" aria-label="game and wireframes">
+
+      <div>
+        <div class="card game-wrap" id="gameSection">
+          <div class="game-header">
+            <div class="score" aria-live="polite">Score: <span id="score">0</span></div>
+            <div class="meter">
+              <div class="small">Water</div>
+              <div class="bar" aria-hidden="true">
+                <div class="bar-fill" id="barFill" style="width:0%"></div>
+              </div>
+              <div id="timer" class="small">30s</div>
+            </div>
+            <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen" aria-label="Toggle fullscreen mode">
+              <svg id="fullscreenIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+              </svg>
+            </button>
+          </div>
+
+          <canvas id="gameCanvas" width="720" height="420" aria-label="Ripple Effect game canvas" tabindex="0"></canvas>
+
+          <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
+            <div class="small">Lives: <span id="lives">3</span></div>
+            <div>
+              <button class="btn btn-play" id="startBtn">Start Round</button>
+              <button class="btn btn-learn" id="resetBtn">Reset</button>
+            </div>
+          </div>
+
+          <div class="results" id="results">
+            <div style="font-weight:700" id="resultsTitle">Round Complete</div>
+            <div id="resultsStats" class="small">You scored 0 points.</div>
+            <div class="facts" id="levelFact">Fun fact about water.</div>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button class="btn btn-play" id="claimBtn">Claim Campus Reward</button>
+              <button class="btn btn-learn" id="shareBtn">Share</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <aside>
+        <div class="wireframe card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-weight:700">Wireframes</div>
+            <div class="small">Mobile / Tablet</div>
+          </div>
+
+          <div class="mock" aria-hidden="true">Wireframe: Start • Gameplay • Results</div>
+
+          <ul style="margin-top:12px">
+            <li class="small"><strong>Start:</strong> charity: water logo, Play Now, How it works</li>
+            <li class="small"><strong>Gameplay:</strong> score, timer, water meter, falling drops, tap interaction</li>
+            <li class="small"><strong>Results:</strong> points → Ripple Coins, claim reward link, fun fact</li>
+          </ul>
+
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="card">
+          <div style="font-weight:700">Brand Notes</div>
+          <div class="small" style="margin-top:8px">
+            Palette: <span style="color:var(--cw-yellow)">Yellow</span>, <span style="color:var(--cw-blue)">Blue</span>, white.
+            Use optimistic tone, friendly icons (water drops, jerrycans), and short educational facts.
+          </div>
+        </div>
+
+      </aside>
+    </section>
+
     <section class="card" aria-label="game logic">
       <h3 style="margin:0 0 8px 0">Game Logic</h3>
       <ol style="margin:0 0 8px 18px">
-        <li>Start 30s round → droplets spawn from top with realistic physics</li>
-        <li>Tap clean water droplets: +10 points, sound effect, visual feedback</li>
-        <li>Avoid polluted droplets: -1 life, penalty sound, screen flash</li>
-        <li>Difficulty modes: Easy (5 lives), Normal (3 lives), Hard (2 lives)</li>
-        <li>Fill water meter to 100% to complete round successfully</li>
+        <li>Start 30s round → droplets spawn from top.</li>
+        <li>Tap clean droplets: +10 pts. Polluted droplets: -10% water level (or -1 life).</li>
+        <li>Filling the water meter builds a virtual well → convert to Ripple Coins.</li>
+        <li>Points convert to campus rewards; weekly leaderboards encourage competition.</li>
       </ol>
-      <div class="small">Interactive DOM reactions, milestone messages, and sound effects enhance the gameplay experience.</div>
+      <div class="small">This in-browser prototype demonstrates core mechanics — it's intentionally simple so it can be extended later with levels, progression, and campus integrations.</div>
     </section>
 
-    <!-- Milestone notifications (Rubric Requirement) -->
-    <div class="rw-milestone" id="rw-milestone"></div>
+    <footer>
+      <div class="small">© 2025 Ripple Effect — prototype for charity: water • Built by Rhiannon Pickard</div>
+    </footer>
+
+    <!-- modal for claim -->
+    <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" role="document">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3>Claim Campus Reward</h3>
+          <button class="close-btn" id="closeModal" aria-label="close">✕</button>
+        </div>
+        <p class="small">You earned <strong id="modalCoins">0</strong> Ripple Coins. Show this screen at the campus kiosk to redeem cafeteria discount.</p>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-play" id="confirmClaim">Get Code</button>
+          <button class="btn btn-learn" id="closeClaim">Cancel</button>
+        </div>
+        <div class="leaderboard" id="claimCodeArea" style="display:none;margin-top:10px">
+          <div class="small">Your code: <strong id="claimCode">RW-XXXX-2025</strong></div>
+          <div class="small" style="margin-top:6px">Present this code at the student center to redeem.</div>
+        </div>
+      </div>
+    </div>
 
   </main>
 
@@ -517,7 +667,13 @@
       const resultsTitle = document.getElementById('resultsTitle');
       const resultsStats = document.getElementById('resultsStats');
       const levelFact = document.getElementById('levelFact');
-
+      const claimBtn = document.getElementById('claimBtn');
+      const modal = document.getElementById('modal');
+      const closeModal = document.getElementById('closeModal');
+      const confirmClaim = document.getElementById('confirmClaim');
+      const claimCode = document.getElementById('claimCode');
+      const claimCodeArea = document.getElementById('claimCodeArea');
+      const modalCoins = document.getElementById('modalCoins');
       const resetUI = () => {
         scoreEl.textContent = score;
         livesEl.textContent = lives;
@@ -1155,6 +1311,9 @@
           'An investment in water and sanitation reduces health care costs and boosts education.'
         ];
         levelFact.textContent = facts[Math.floor(Math.random()*facts.length)];
+        modalCoins.textContent = coins;
+        // store lastCoins for modal usage
+        canvas._lastCoins = coins;
       }
 
       function resetGame(){
@@ -1194,7 +1353,9 @@
         startRound();
       });
       resetBtn.addEventListener('click', ()=> resetGame());
-
+      document.getElementById('jumpToGame').addEventListener('click', ()=> {
+        document.getElementById('gameSection').scrollIntoView({behavior:'smooth', block:'center'});
+      });
 
       // Fullscreen functionality
       const fullscreenBtn = document.getElementById('fullscreenBtn');
@@ -1266,7 +1427,47 @@
         }
       });
 
+      // results actions
+      claimBtn.addEventListener('click', ()=> {
+        openModal();
+      });
+      
+      // Share button handler
+      document.getElementById('shareBtn').addEventListener('click', ()=> {
+        const shareText = `I just scored ${score} points in Ripple Effect! 🌊 Playing games for clean water access. #RippleEffect #CharityWater`;
+        if (navigator.share) {
+          navigator.share({
+            title: 'Ripple Effect Game',
+            text: shareText,
+            url: window.location.href
+          });
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(shareText + ' ' + window.location.href);
+          alert('Score shared to clipboard!');
+        } else {
+          alert(shareText);
+        }
+      });
+      
+      closeModal.addEventListener('click', ()=> closeModalFn());
+      document.getElementById('closeClaim').addEventListener('click', ()=> closeModalFn());
+      confirmClaim.addEventListener('click', ()=> {
+        // generate a pseudo claim code
+        const code = 'RW-' + Math.random().toString(36).slice(2,7).toUpperCase() + '-25';
+        claimCode.textContent = code;
+        claimCodeArea.style.display = 'block';
+      });
 
+      function openModal(){
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden','false');
+        claimCodeArea.style.display = 'none';
+        claimCode.textContent = '';
+      }
+      function closeModalFn(){
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+      }
 
       // Initialize the game
       function initializeGame(){
@@ -1432,110 +1633,11 @@
 
     })();
 
-
+    // small "How It Works" modal-like info
+    document.getElementById('howItWorksBtn').addEventListener('click', ()=>{
+      alert('Tap blue water drops to collect clean water (+10 points). Avoid gray polluted drops (they cost water % or lives). Fill the water meter to build a virtual well. Points convert to Ripple Coins for campus rewards.');
+    });
 
   </script>
-
-<!-- === RUBRIC ENHANCER START === -->
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-:root{--rw-blue:#00aef0;--rw-yellow:#ffcf33;--rw-dark:#0f1724;}
-body{font-family:'Poppins',sans-serif;}
-.rw-footer{margin-top:30px;padding:20px;background:#f8fbff;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-.rw-footer a{color:var(--rw-blue);font-weight:600;text-decoration:none;}
-.rw-control-bar{display:flex;gap:10px;align-items:center;margin:20px 0;}
-.rw-select,.rw-btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;}
-.rw-btn{background:var(--rw-blue);color:white;border:none;}
-.rw-milestone{position:fixed;right:20px;top:20px;background:var(--rw-blue);color:white;padding:10px 15px;border-radius:10px;display:none;}
-</style>
-
-<div class="rw-control-bar">
-  <label>Difficulty:</label>
-  <select id="rw-difficulty" class="rw-select">
-    <option value="easy">Easy</option>
-    <option value="normal" selected>Normal</option>
-    <option value="hard">Hard</option>
-  </select>
-  <span>Score: <strong id="rw-score">0</strong></span>
-  <span>Lives: <strong id="rw-lives">3</strong></span>
-  <button id="rw-reset" class="rw-btn">Reset Game</button>
-</div>
-
-<div class="rw-milestone" id="rw-milestone"></div>
-
-<div class="rw-footer">
-  <div>
-    <strong>Ripple Effect</strong><br>
-    <small>Charity: water project by Rhiannon Pickard</small>
-  </div>
-  <div>
-    <a href="https://www.charitywater.org" target="_blank">charitywater.org</a> |
-    <a href="https://www.charitywater.org/donate" target="_blank">Donate</a>
-  </div>
-</div>
-
-<script>
-(() => {
-  let score = 0, lives = 3;
-  const scoreEl = document.getElementById('rw-score');
-  const livesEl = document.getElementById('rw-lives');
-  const diffSel = document.getElementById('rw-difficulty');
-  const resetBtn = document.getElementById('rw-reset');
-  const milestone = document.getElementById('rw-milestone');
-  const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-
-  function beep(freq=440, dur=0.1){
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.frequency.value = freq; osc.start();
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
-    osc.stop(audioCtx.currentTime+dur);
-  }
-
-  function showMilestone(msg){
-    milestone.textContent = msg;
-    milestone.style.display = 'block';
-    setTimeout(()=> milestone.style.display='none',1500);
-  }
-
-  function updateDisplay(){
-    scoreEl.textContent = score;
-    livesEl.textContent = lives;
-  }
-
-  document.addEventListener('click', e => {
-    const t = e.target;
-    if(t.classList.contains('drop') || t.dataset.drop){
-      if(t.classList.contains('polluted')){
-        lives = Math.max(0, lives - 1);
-        beep(180, 0.2);
-        showMilestone('-1 Life');
-      } else {
-        score += 10;
-        beep(600, 0.1);
-        showMilestone('+10!');
-      }
-      updateDisplay();
-    }
-  });
-
-  diffSel.addEventListener('change', e=>{
-    const diff = e.target.value;
-    if(diff==='easy'){ lives=5; }
-    if(diff==='normal'){ lives=3; }
-    if(diff==='hard'){ lives=2; }
-    updateDisplay();
-    showMilestone('Mode: '+diff);
-  });
-
-  resetBtn.addEventListener('click', ()=>{
-    score=0; lives=3; updateDisplay(); showMilestone('Game reset');
-  });
-})();
-</script>
-<!-- === RUBRIC ENHANCER END === -->
-
 </body>
 </html>
