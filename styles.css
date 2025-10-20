@@ -234,9 +234,37 @@ canvas{
 /* game controls */
 .game-controls{
   display:flex;
+  flex-wrap: wrap;
   justify-content:space-between;
   align-items:center;
   gap:12px;
+}
+.difficulty-selector{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.difficulty-selector label{
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--cw-dark);
+}
+.btn-difficulty{
+  padding: 6px 12px;
+  font-size: 13px;
+  background: #fff;
+  color: var(--cw-dark);
+  border: 2px solid rgba(7,38,58,0.1);
+}
+.btn-difficulty.active{
+  background: var(--cw-yellow);
+  border-color: var(--cw-yellow);
+  color: var(--cw-dark);
+}
+.btn-difficulty:hover{
+  background: #fffbe6;
+  border-color: var(--cw-yellow);
 }
 .lives-indicator{
   font-size:18px;
@@ -245,6 +273,36 @@ canvas{
 .button-group{
   display:flex;
   gap:8px;
+}
+
+/* Milestone notification */
+.milestone-notification{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, var(--cw-yellow), #ffe066);
+  color: var(--cw-dark);
+  padding: 20px 30px;
+  border-radius: 16px;
+  font-size: 24px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(255,211,0,0.4);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.milestone-notification.show{
+  opacity: 1;
+  animation: milestonePopup 3s ease;
+}
+@keyframes milestonePopup{
+  0%{transform: translate(-50%, -50%) scale(0.8); opacity: 0;}
+  10%{transform: translate(-50%, -50%) scale(1.1); opacity: 1;}
+  20%{transform: translate(-50%, -50%) scale(1); opacity: 1;}
+  85%{transform: translate(-50%, -50%) scale(1); opacity: 1;}
+  100%{transform: translate(-50%, -50%) scale(0.9); opacity: 0;}
 }
 
 /* results panel */

@@ -47,6 +47,48 @@
   let timeLeft = roundTime;
   let timerId = null;
   let animationId = null;
+  
+  // Difficulty modes
+  let currentDifficulty = 'normal';
+  const difficultySettings = {
+    easy: { spawnInterval: 900, dropSpeed: 1.5, roundTime: 45, lives: 5 },
+    normal: { spawnInterval: 700, dropSpeed: 2, roundTime: 30, lives: 3 },
+    hard: { spawnInterval: 500, dropSpeed: 3, roundTime: 20, lives: 2 }
+  };
+  
+  // Milestones
+  let milestones = [50, 100, 150];
+  let milestonesReached = [];
+  
+  // Sound effects
+  const sounds = {
+    collect: new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGnOD0t2snCCqAy/H'),
+    lose: new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACAgICAgo'),
+    milestone: new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACA')
+  };
+  
+  // Mute sounds on error
+  Object.values(sounds).forEach(sound => {
+    sound.volume = 0.3;
+    sound.addEventListener('error', () => sound.muted = true);
+  });
+
+  // Unlock audio on first user gesture (for iOS/Chrome autoplay policies)
+  function unlockAudio() {
+    Object.values(sounds).forEach(sound => {
+      try {
+        sound.muted = false;
+        sound.currentTime = 0;
+        sound.play().catch(()=>{});
+        sound.pause();
+        sound.currentTime = 0;
+      } catch(e){}
+    });
+    window.removeEventListener('pointerdown', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
+  }
+  window.addEventListener('pointerdown', unlockAudio, { once: true });
+  window.addEventListener('keydown', unlockAudio, { once: true });
 
   // DOM refs
   const scoreEl = document.getElementById('score');
@@ -379,9 +421,12 @@
         if(d.polluted){
           lives = Math.max(0, lives - 1); waterPercent = Math.max(0, waterPercent - 10); flashScreen('#fdecea');
           for(let i = 0; i < 5; i++) addParticle(d.x + (Math.random() - 0.5) * 20, d.y + (Math.random() - 0.5) * 20, 'negative');
+          try{ sounds.lose.currentTime = 0; sounds.lose.play(); } catch(e){}
         } else {
           score += 10; waterPercent = Math.min(100, waterPercent + 6); popEffect(d.x, d.y); flashScreen('#fff4d9');
           for(let i = 0; i < 8; i++) addParticle(d.x + (Math.random() - 0.5) * 30, d.y + (Math.random() - 0.5) * 30, 'positive');
+          try{ sounds.collect.currentTime = 0; sounds.collect.play(); } catch(e){}
+          checkMilestones();
         }
         drops.splice(i,1); resetUI(); checkGameOver(); return;
       }
@@ -412,7 +457,14 @@
   // Round control
   function startRound(){
     try{
-      drops = []; lastSpawn = 0; spawnInterval = 900; running = true; paused = false; score = 0; lives = 3; waterPercent = 0; timeLeft = roundTime;
+      // Apply difficulty settings
+      const settings = difficultySettings[currentDifficulty];
+      spawnInterval = settings.spawnInterval;
+      lives = settings.lives;
+      timeLeft = settings.roundTime;
+      milestonesReached = [];
+      
+      drops = []; lastSpawn = 0; running = true; paused = false; score = 0; waterPercent = 0;
       resetUI(); results.classList.remove('show');
       setupCanvas();
       startTimer(); cancelAnimationFrame(animationId); lastFrame = performance.now(); animationId = requestAnimationFrame(loop);
@@ -663,6 +715,39 @@
     resetUI(); setupCanvas(); drawWelcomeScreen();
     document.addEventListener('visibilitychange', ()=>{ if(document.hidden && running && !paused){ pauseGame(); } });
   }
+  
+  // Milestone checking
+  function checkMilestones(){
+    milestones.forEach(milestone => {
+      if (score >= milestone && !milestonesReached.includes(milestone)) {
+        milestonesReached.push(milestone);
+        showMilestoneNotification(`🎉 ${milestone} Points Milestone!`);
+  try{ sounds.milestone.currentTime = 0; sounds.milestone.play(); } catch(e){}
+      }
+    });
+  }
+  
+  function showMilestoneNotification(message){
+    const notification = document.getElementById('milestoneNotification');
+    if (!notification) return;
+    notification.textContent = message;
+    notification.classList.add('show');
+    setTimeout(() => notification.classList.remove('show'), 3000);
+  }
+  
+  // Difficulty selector handlers
+  document.querySelectorAll('.btn-difficulty').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-difficulty').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDifficulty = btn.dataset.difficulty;
+      if (!running) {
+        const settings = difficultySettings[currentDifficulty];
+        lives = settings.lives;
+        resetUI();
+      }
+    });
+  });
 
   // Accessibility & hints
   canvas.addEventListener('keydown', (e)=>{ if(e.key === ' ' || e.key === 'Enter') startRound(); });

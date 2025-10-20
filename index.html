@@ -47,7 +47,7 @@
 
     <section class="game-container" aria-label="game">
       <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener" class="game-logo-fixed" aria-label="Donate to charity: water">
-        <img src="charity-water-logo.png" alt="charity: water logo" />
+        <img src="jerrycan-logo.png" alt="charity: water jerry can logo" />
       </a>
       <div class="card game-wrap" id="gameSection">
         <div class="game-header">
@@ -75,6 +75,12 @@
         </div>
 
         <div class="game-controls">
+          <div class="difficulty-selector">
+            <label>Difficulty:</label>
+            <button class="btn btn-difficulty" data-difficulty="easy">Easy</button>
+            <button class="btn btn-difficulty active" data-difficulty="normal">Normal</button>
+            <button class="btn btn-difficulty" data-difficulty="hard">Hard</button>
+          </div>
           <div class="lives-indicator">❤️ <span id="lives">3</span></div>
           <div class="button-group">
             <button class="btn btn-play" id="startBtn">Start</button>
@@ -82,6 +88,8 @@
             <button class="btn btn-secondary" id="resetBtn">Reset</button>
           </div>
         </div>
+        
+        <div class="milestone-notification" id="milestoneNotification"></div>
 
         <div class="results" id="results">
           <div class="results-score" id="resultsTitle">🎉</div>
@@ -98,7 +106,16 @@
     <footer>
       <div class="footer-content">
         <div class="footer-logo logo-mark" aria-hidden="true">
-          <img src="charity-water-logo.png" alt="charity: water logo" />
+          <svg width="48" height="56" viewBox="0 0 201 201" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="charity: water jerry can logo">
+            <g>
+              <rect x="16" y="24" width="169" height="161" rx="24" fill="#FFD300"/>
+              <rect x="70" y="40" width="61" height="16" rx="8" fill="#fff"/>
+              <rect x="90" y="80" width="21" height="16" rx="6" fill="#fff"/>
+              <path d="M44 60 L100 100 L100 160 M157 60 L101 100 L101 160" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="80" y="16" width="41" height="16" rx="8" fill="#FFD300"/>
+              <rect x="32" y="8" width="32" height="24" rx="8" fill="#FFD300"/>
+            </g>
+          </svg>
         </div>
         <div class="small">Ripple Effect • charity: water</div>
       </div>
