@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
 
 # Ripple Effect - Deployment Helper
 # This script helps prepare the game for deployment
@@ -7,7 +9,7 @@ echo "🌊 Ripple Effect - Deployment Helper"
 echo "===================================="
 
 # Check if we're in the right directory
-if [ ! -f "index.html" ]; then
+if [[ ! -f "index.html" ]]; then
     echo "❌ Error: index.html not found. Make sure you're in the project root."
     exit 1
 fi
@@ -18,9 +20,7 @@ mkdir -p build
 
 # Copy files to build directory
 echo "📋 Copying files..."
-cp index.html build/
-cp preview.html build/
-cp README.md build/
+cp -v index.html styles.css game.js preview.html README.md build/
 
 echo "✨ Build complete!"
 echo ""
@@ -32,30 +32,40 @@ echo "4. Local server: 'cd build && python3 -m http.server 8000'"
 echo ""
 
 # GitHub Pages helper
-read -p "📤 Deploy to GitHub Pages? (y/n): " -n 1 -r
+read -rp "📤 Deploy to GitHub Pages? (y/n): " -n 1 -r
 echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+if [[ ${REPLY:-n} =~ ^[Yy]$ ]]; then
     echo "🔧 Setting up GitHub Pages deployment..."
     
     # Check if git is initialized
-    if [ ! -d ".git" ]; then
+        if [[ ! -d ".git" ]]; then
         echo "Initializing git repository..."
         git init
         git add .
         git commit -m "Initial commit: Ripple Effect game"
     fi
     
-    # Create gh-pages branch
-    git checkout -b gh-pages 2>/dev/null || git checkout gh-pages
+        # Build subtree deployment to gh-pages branch
+        echo "🚚 Pushing build/ as subtree to gh-pages branch..."
+        if git rev-parse --verify gh-pages >/dev/null 2>&1; then
+            : # branch exists
+        else
+            git checkout -b gh-pages
+            git reset --hard
+            git checkout -
+        fi
     
-    # Copy build files to root for GitHub Pages
-    cp build/* .
+        git add build
+        git commit -m "chore(build): update static site" || true
     
-    echo "📝 Files ready for GitHub Pages!"
-    echo "   1. git add ."
-    echo "   2. git commit -m 'Deploy to GitHub Pages'"
-    echo "   3. git push origin gh-pages"
-    echo "   4. Enable Pages in your GitHub repo settings"
+        # Use subtree split to create a commit from build directory and push it
+        SHA=$(git subtree split --prefix build gh-pages 2>/dev/null || git subtree split --prefix build HEAD)
+        git push -f origin "$SHA":gh-pages
+    
+        echo "📝 GitHub Pages updated!"
+        echo "   • Branch: gh-pages"
+        echo "   • Source: /build subtree"
+        echo "   • Next: Ensure Pages is enabled to serve from gh-pages"
     echo ""
     echo "🌐 Your game will be available at:"
     echo "   https://rhiannonpickard.github.io/Charitywater/"

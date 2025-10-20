@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ripple Effect - Game Preview</title>
+    <meta name="description" content="Preview the Ripple Effect game concept for charity: water. Learn the goals, features, and try the playable demo.">
     <style>
         body {
             margin: 0;
@@ -92,6 +93,9 @@
             from { transform: translateY(-50px); opacity: 1; }
             to { transform: translateY(100vh); opacity: 0; }
         }
+        @media (prefers-reduced-motion: reduce){
+            * { animation: none !important; transition: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -99,7 +103,7 @@
     
     <div class="preview-card">
         <div class="logo">💧 Ripple Effect</div>
-        <div class="tagline">charity: water Student Engagement Game</div>
+    <div class="tagline" aria-label="charity: water Student Engagement Game">charity: water Student Engagement Game</div>
         
         <p>An interactive web game that teaches about clean water access while earning campus rewards. Tap water drops, fill jerrycans, and make a difference!</p>
         
@@ -126,7 +130,7 @@
             </div>
         </div>
         
-        <a href="index.html" class="cta">Play the Game →</a>
+    <a href="index.html" class="cta" aria-label="Play the game">Play the Game →</a>
         
         <div style="margin-top: 30px; font-size: 14px; color: #6b7b85;">
             Built by Rhiannon Pickard • Open Source • HTML5/Canvas

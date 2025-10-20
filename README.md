@@ -22,6 +22,11 @@ A fun, mobile-first game that teaches players about clean water access while ear
 4. **Fill the water meter** to 100% to build a virtual well
 5. **Earn Ripple Coins** to claim campus rewards
 
+Keyboard shortcuts
+- F — Toggle fullscreen
+- P — Pause/Resume during a round
+- Esc — Close the claim modal
+
 ## 🚀 Getting Started
 
 ### Play Online
@@ -32,6 +37,12 @@ Simply open `index.html` in your web browser or serve it with a local HTTP serve
 python3 -m http.server 8000
 
 # Then visit http://localhost:8000
+```
+
+Or use the included helper script to assemble a clean `build/` folder and optionally publish to GitHub Pages:
+
+```bash
+./deploy.sh
 ```
 
 ### Requirements
@@ -59,6 +70,7 @@ Each game round includes facts about clean water access:
 - Touch-optimized controls for mobile devices
 - Smooth animations at 60fps
 - Progressive enhancement for better performance
+- Honors `prefers-reduced-motion` to minimize decorative animations
 
 ## 🔧 Technical Details
 
@@ -67,6 +79,11 @@ Each game round includes facts about clean water access:
 - **RequestAnimationFrame** for smooth animations
 - **Touch event handling** for mobile compatibility
 - **Accessible markup** with ARIA labels
+
+### Code quality
+- Canvas drawing includes fallbacks for APIs like `roundRect`
+- Initialization runs once to avoid duplicate listeners
+- Minor a11y niceties: Escape closes modal, buttons have titles/labels; modal traps focus; pause on tab hidden
 
 ## 👩‍💻 Developer
 
