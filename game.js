@@ -50,10 +50,13 @@
   
   // Difficulty modes
   let currentDifficulty = 'normal';
+  // Tweaked to make higher difficulties feel noticeably faster
   const difficultySettings = {
-    easy: { spawnInterval: 900, dropSpeed: 1.5, roundTime: 45, lives: 5 },
-    normal: { spawnInterval: 700, dropSpeed: 2, roundTime: 30, lives: 3 },
-    hard: { spawnInterval: 500, dropSpeed: 3, roundTime: 20, lives: 2 }
+    // spawnMin: lower bound for interval between spawns
+    // spawnAccel: how much the interval shrinks per second as the round progresses
+    easy:   { spawnInterval: 950, spawnMin: 520, spawnAccel: 10, dropSpeed: 1.3, roundTime: 45, lives: 5 },
+    normal: { spawnInterval: 650, spawnMin: 340, spawnAccel: 14, dropSpeed: 1.7, roundTime: 30, lives: 3 },
+    hard:   { spawnInterval: 420, spawnMin: 220, spawnAccel: 18, dropSpeed: 2.2, roundTime: 20, lives: 2 }
   };
   
   // Milestones
@@ -124,9 +127,11 @@
   const rand = (min,max)=> Math.random()*(max-min)+min;
 
   function createDrop(isPolluted){
+    const settings = difficultySettings[currentDifficulty] || {};
+    const speedMult = settings.dropSpeed || 1;
     const size = isPolluted ? rand(24,35) : rand(18,28);
     const x = rand(size * 2, canvas._w - size * 2);
-    const speed = isPolluted ? rand(40,60) : rand(30,50);
+    const speed = (isPolluted ? rand(40,60) : rand(30,50)) * speedMult;
     return {
       x, y: -size * 2, size, speed,
       polluted: !!isPolluted,
@@ -134,7 +139,7 @@
       rotation: rand(0, Math.PI * 2),
       rotationSpeed: rand(-0.03, 0.03),
       birth: Date.now(),
-      gravity: isPolluted ? 90 : 75,
+      gravity: (isPolluted ? 90 : 75) * speedMult,
       drag: 0.999,
       opacity: isPolluted ? rand(0.8, 1.0) : 1.0,
       trail: []
@@ -221,7 +226,13 @@
     if(Date.now() - lastSpawn > spawnInterval){
       spawnDrop();
       lastSpawn = Date.now();
-      spawnInterval = Math.max(400, 900 - (30 - timeLeft)*10);
+      const s = difficultySettings[currentDifficulty];
+      const base = s?.spawnInterval || 700;
+      const minI = s?.spawnMin || 300;
+      const accel = s?.spawnAccel || 12;
+      // As the timer counts down, increase spawn rate using difficulty curve
+      const elapsed = (s?.roundTime || 30) - timeLeft;
+      spawnInterval = Math.max(minI, base - elapsed * accel);
     }
     for(let i=drops.length-1;i>=0;i--){
       const d = drops[i];
@@ -458,10 +469,10 @@
   function startRound(){
     try{
       // Apply difficulty settings
-      const settings = difficultySettings[currentDifficulty];
-      spawnInterval = settings.spawnInterval;
-      lives = settings.lives;
-      timeLeft = settings.roundTime;
+  const settings = difficultySettings[currentDifficulty];
+  spawnInterval = settings.spawnInterval; // starting interval per difficulty
+  lives = settings.lives;
+  timeLeft = settings.roundTime;
       milestonesReached = [];
       
       drops = []; lastSpawn = 0; running = true; paused = false; score = 0; waterPercent = 0;
